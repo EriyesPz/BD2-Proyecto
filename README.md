@@ -5,6 +5,10 @@ Este proyecto es un monorepositorio que contiene tanto el frontend como el backe
 
 ## Estructura del proyecto
 
+## Requisitos
+
+- [Node.js](https://nodejs.org/en) (v18 o mayor)
+
 La estructura de carpetas del proyecto es la siguiente:
 
 ```bash 
