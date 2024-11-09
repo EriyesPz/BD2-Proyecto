@@ -31,6 +31,7 @@ export const LoginForm: React.FC = () => {
           <InputText
             placeholder="Ingrese su contraseña"
             iconComponent={<Lock />}
+            type="password"
           />
         </InputGroup>
         <ButtonWrapper>
