@@ -20,7 +20,7 @@ export const Input = styled.input`
   flex: 1;
   font-size: 14px;
   color: #000000;
-  font-family: sans-serif, Roboto;
+  font-family: 'Roboto', sans-serif;
 
   ::placeholder {
     color: #a0a0a0;
