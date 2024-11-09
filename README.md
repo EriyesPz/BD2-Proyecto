@@ -25,7 +25,7 @@ bd2-proyecto/
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu_usuario/bd2-proyecto.git
+git clone https://github.com/EriyesPz/BD2-Proyecto.git
 ```
 
 2. Instala las dependencias en el directorio raíz:
