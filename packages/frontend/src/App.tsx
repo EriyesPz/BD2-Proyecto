@@ -2,6 +2,7 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import { InputText } from "../src/components/ui/input";
+import { Label } from "../src/components/ui/label";
 import Lock from "@mui/icons-material/Lock";
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
   return (
     <>
       <div>
+        <Label>Hola</Label>
         <InputText
           icon={true}
           iconComponent={<Lock fontSize="small"></Lock>}
