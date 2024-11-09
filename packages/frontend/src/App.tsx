@@ -3,6 +3,7 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import { InputText } from "../src/components/ui/input";
 import { Label } from "../src/components/ui/label";
+import { Button } from "../src/components/ui/button";
 import Lock from "@mui/icons-material/Lock";
 
 function App() {
@@ -17,6 +18,9 @@ function App() {
           iconComponent={<Lock fontSize="small"></Lock>}
           type="password"
         ></InputText>
+        <Button>
+          Iniciar Sesion
+        </Button>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
