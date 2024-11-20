@@ -1,12 +1,12 @@
 import sql from "mssql";
 import { Keys } from "../config";
 
-const dbConfig = {
+const dbConfiguracion = {
   server: Keys.DB.Host,
-  database: Keys.DB.Name,
-  user: Keys.DB.User,
-  password: Keys.DB.Password,
-  port: parseInt(Keys.DB.Port),
+  database: Keys.DB.Nombre,
+  user: Keys.DB.Usuario,
+  password: Keys.DB.Contrasenia,
+  port: parseInt(Keys.DB.Puerto),
   options: {
     trustServerCertificate: true,
     trustedConnection: false,
@@ -14,11 +14,11 @@ const dbConfig = {
   },
 };
 
-console.log(dbConfig);
+console.log(dbConfiguracion);
 
-export const dbConnection = async () => {
+export const dbConexion = async () => {
   try {
-    const pool = await new sql.ConnectionPool(dbConfig).connect();
+    const pool = await new sql.ConnectionPool(dbConfiguracion).connect();
     console.log("Conexión a SQL Server establecida");
     return pool;
   } catch (error) {
