@@ -1,14 +1,25 @@
-USE Hospital
+-- Crear la base de datos si no existe
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'Hospital')
+BEGIN
+    CREATE DATABASE Hospital;
+END
+GO
+
+USE Hospital;
+GO
+
 
 CREATE SCHEMA Usuarios;
+GO
 
-
+-- Crear secuencia para generar EmpleadoID
 CREATE SEQUENCE Usuarios.EmpleadoIDSeq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 1
     MAXVALUE 9999
-    CACHE 1
+    CACHE 1;
+GO
 
 
 CREATE TABLE Usuarios.Usuarios (
@@ -18,51 +29,32 @@ CREATE TABLE Usuarios.Usuarios (
     Email VARCHAR(100) NOT NULL UNIQUE,
     Usuario VARCHAR(50),
     Rol VARCHAR(50) NOT NULL,
-    Contrasenia TEXT NOT NULL,
-    Token TEXT,
-    TokenFecha DATETIME,
-    Creado DATETIME DEFAULT GETDATE(),
-    Actualizado DATETIME DEFAULT GETDATE()
+    Contrasenia VARCHAR(255) NOT NULL,  -- Encriptar contraseñas
+    Token VARCHAR(256),
+    TokenFecha DATETIME2,
+    Creado DATETIME2 DEFAULT SYSDATETIME(),
+    Actualizado DATETIME2 DEFAULT SYSDATETIME()
 );
+GO
+
+-- Agregar índice para mejorar búsquedas por email
+CREATE INDEX IDX_Usuarios_Email ON Usuarios.Usuarios(Email);
+GO
 
 
-SELECT * FROM Usuarios.Usuarios WHERE Email = 'erick.reyes@gmail.com'
-
-ALTER TABLE Usuarios.Usuarios ALTER COLUMN TokenFecha DATETIME
-
-CREATE TRIGGER Usuarios.GenerarEmpleadoIDTrigger
+CREATE OR ALTER TRIGGER Usuarios.GenerarEmpleadoIDTrigger
 ON Usuarios.Usuarios
 AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    UPDATE Usuarios.Usuarios
-    SET EmpleadoID = 'EMP:' + RIGHT('0000' + CAST(NEXT VALUE FOR Usuarios.EmpleadoIDSeq AS VARCHAR), 4)
+    UPDATE U
+    SET EmpleadoID = 'EMP:' + RIGHT('0000' + CAST(NEXT VALUE FOR Usuarios.EmpleadoIDSeq AS VARCHAR(4)), 4)
     FROM Usuarios.Usuarios U
     INNER JOIN inserted I ON U.UUID = I.UUID;
 END;
-
-
-SELECT * FROM Usuarios.Usuarios;
-
-INSERT INTO Usuarios.Usuarios (
-    Nombre, Email, Usuario, Rol, Contrasenia
-) VALUES (
-    'Erick Reyes',
-    'erick.reyes@gmail.com',
-    'ereyes',
-    'Admin',
-    '12345'
-);
-
-
-
-
-SELECT * 
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_NAME = 'Usuarios';
-
+GO
 
 
 CREATE SCHEMA dbo;
@@ -74,8 +66,9 @@ CREATE TABLE dbo.Direcciones (
     Ciudad VARCHAR(50) NOT NULL,
     Estado VARCHAR(50) NOT NULL,
     CodigoPostal VARCHAR(10) NOT NULL,
-    Pais VARCHAR(50) NOT NULL,
+    Pais VARCHAR(50) NOT NULL
 );
+GO
 
 
 CREATE SCHEMA Medico;
@@ -86,22 +79,33 @@ CREATE TABLE Medico.Especialidades (
     NombreEspecialidad VARCHAR(100) NOT NULL UNIQUE,
     Descripcion VARCHAR(500) NULL
 );
+GO
 
 CREATE TABLE Medico.Medicos (
     MedicoID INT IDENTITY(1,1) PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL,
     Apellido VARCHAR(50) NOT NULL,
-    EspecialidadID INT NOT NULL FOREIGN KEY REFERENCES Medico.Especialidades(EspecialidadID),
+    EspecialidadID INT NOT NULL,
     Interno BIT NOT NULL,
     HonorariosConsulta DECIMAL(10,2) NOT NULL CHECK (HonorariosConsulta >= 0),
     HonorariosCirugia DECIMAL(10,2) NULL CHECK (HonorariosCirugia >= 0),
-    DireccionID INT NULL FOREIGN KEY REFERENCES dbo.Direcciones(DireccionID),
+    DireccionID INT NULL,
     Telefono VARCHAR(20) NULL,
     Email VARCHAR(100) NULL UNIQUE,
-    FechaRegistro DATETIME2 DEFAULT SYSDATETIME()  -- Uso de función avanzada
+    FechaRegistro DATETIME2 DEFAULT SYSDATETIME()
 );
+GO
+
+ALTER TABLE Medico.Medicos
+ADD CONSTRAINT FK_Medicos_Especialidades
+FOREIGN KEY (EspecialidadID) REFERENCES Medico.Especialidades(EspecialidadID);
+
+ALTER TABLE Medico.Medicos
+ADD CONSTRAINT FK_Medicos_Direcciones
+FOREIGN KEY (DireccionID) REFERENCES dbo.Direcciones(DireccionID);
 
 CREATE INDEX IDX_Medicos_Especialidad ON Medico.Medicos(EspecialidadID);
+GO
 
 
 CREATE SCHEMA Paciente;
@@ -114,29 +118,46 @@ CREATE TABLE Paciente.SegurosMedicos (
     Telefono VARCHAR(20) NULL,
     Email VARCHAR(100) NULL
 );
+GO
 
 CREATE TABLE Paciente.Pacientes (
     PacienteID INT IDENTITY(1,1) PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL,
     Apellido VARCHAR(50) NOT NULL,
     FechaNacimiento DATE NOT NULL,
-    Genero CHAR(1) CHECK (Genero IN ('M', 'F', 'O')),  -- M: Masculino, F: Femenino, O: Otro
+    Genero CHAR(1) CHECK (Genero IN ('M', 'F', 'O')),
     Telefono VARCHAR(20) NULL,
     Email VARCHAR(100) NULL,
-    DireccionID INT NULL FOREIGN KEY REFERENCES dbo.Direcciones(DireccionID),
+    DireccionID INT NULL,
     NumeroSeguroSocial VARCHAR(50) NULL UNIQUE,
     FechaRegistro DATETIME2 DEFAULT SYSDATETIME()
 );
+GO
+
+ALTER TABLE Paciente.Pacientes
+ADD CONSTRAINT FK_Pacientes_Direcciones
+FOREIGN KEY (DireccionID) REFERENCES dbo.Direcciones(DireccionID);
 
 CREATE TABLE Paciente.PacientesSeguros (
-    PacienteID INT NOT NULL FOREIGN KEY REFERENCES Paciente.Pacientes(PacienteID),
-    SeguroID INT NOT NULL FOREIGN KEY REFERENCES Paciente.SegurosMedicos(SeguroID),
-    NumeroPoliza VARCHAR(50) NOT NULL,
+    PacienteID INT NOT NULL,
+    SeguroID INT NOT NULL,
+    NumeroPoliza NVARCHAR(50) NOT NULL,
     FechaVencimiento DATE NOT NULL,
     PRIMARY KEY (PacienteID, SeguroID)
 );
+GO
+
+ALTER TABLE Paciente.PacientesSeguros
+ADD CONSTRAINT FK_PacientesSeguros_Pacientes
+FOREIGN KEY (PacienteID) REFERENCES Paciente.Pacientes(PacienteID);
+
+ALTER TABLE Paciente.PacientesSeguros
+ADD CONSTRAINT FK_PacientesSeguros_SegurosMedicos
+FOREIGN KEY (SeguroID) REFERENCES Paciente.SegurosMedicos(SeguroID);
 
 CREATE INDEX IDX_Pacientes_Nombre ON Paciente.Pacientes(Nombre, Apellido);
+GO
+
 
 
 CREATE SCHEMA Administracion;
@@ -147,21 +168,32 @@ CREATE TABLE Administracion.Puestos (
     NombrePuesto VARCHAR(100) NOT NULL UNIQUE,
     Descripcion VARCHAR(500) NULL
 );
+GO
 
 CREATE TABLE Administracion.Empleados (
     EmpleadoID INT IDENTITY(1,1) PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL,
     Apellido VARCHAR(50) NOT NULL,
-    PuestoID INT NOT NULL FOREIGN KEY REFERENCES Administracion.Puestos(PuestoID),
+    PuestoID INT NOT NULL,
     FechaContratacion DATE NOT NULL,
-    DireccionID INT NULL FOREIGN KEY REFERENCES dbo.Direcciones(DireccionID),
+    DireccionID INT NULL,
     Telefono VARCHAR(20) NULL,
     Email VARCHAR(100) NULL UNIQUE,
     Salario DECIMAL(10,2) NOT NULL CHECK (Salario >= 0),
     FechaRegistro DATETIME2 DEFAULT SYSDATETIME()
 );
+GO
+
+ALTER TABLE Administracion.Empleados
+ADD CONSTRAINT FK_Empleados_Puestos
+FOREIGN KEY (PuestoID) REFERENCES Administracion.Puestos(PuestoID);
+
+ALTER TABLE Administracion.Empleados
+ADD CONSTRAINT FK_Empleados_Direcciones
+FOREIGN KEY (DireccionID) REFERENCES dbo.Direcciones(DireccionID);
 
 CREATE INDEX IDX_Empleados_Puesto ON Administracion.Empleados(PuestoID);
+GO
 
 
 CREATE SCHEMA Hospitalizacion;
@@ -172,28 +204,44 @@ CREATE TABLE Hospitalizacion.TiposHabitacion (
     Tipo VARCHAR(50) NOT NULL UNIQUE,
     PrecioPorDia DECIMAL(10,2) NOT NULL CHECK (PrecioPorDia >= 0)
 );
+GO
 
 CREATE TABLE Hospitalizacion.Habitaciones (
     HabitacionID INT IDENTITY(1,1) PRIMARY KEY,
     NumeroHabitacion VARCHAR(10) NOT NULL UNIQUE,
-    TipoHabitacionID INT NOT NULL FOREIGN KEY REFERENCES Hospitalizacion.TiposHabitacion(TipoHabitacionID),
+    TipoHabitacionID INT NOT NULL,
     Disponible BIT NOT NULL DEFAULT 1,
-    Caracteristicas XML NULL  -- Uso de tipo de dato XML
+    Caracteristicas XML NULL
 );
+GO
+
+ALTER TABLE Hospitalizacion.Habitaciones
+ADD CONSTRAINT FK_Habitaciones_TiposHabitacion
+FOREIGN KEY (TipoHabitacionID) REFERENCES Hospitalizacion.TiposHabitacion(TipoHabitacionID);
 
 CREATE TABLE Hospitalizacion.Hospitalizaciones (
     HospitalizacionID INT IDENTITY(1,1) PRIMARY KEY,
-    PacienteID INT NOT NULL FOREIGN KEY REFERENCES Paciente.Pacientes(PacienteID),
+    PacienteID INT NOT NULL,
     FechaIngreso DATETIME2 NOT NULL,
     FechaAlta DATETIME2 NULL,
-    HabitacionID INT NOT NULL FOREIGN KEY REFERENCES Hospitalizacion.Habitaciones(HabitacionID),
-    Diagnostico VARCHAR(MAX) NULL,
+    HabitacionID INT NOT NULL,
+    Diagnostico TEXT NULL,
     Estado VARCHAR(20) NOT NULL DEFAULT 'Activo' CHECK (Estado IN ('Activo', 'Alta', 'Cancelado')),
     CONSTRAINT CK_Hospitalizaciones_Fechas CHECK (FechaAlta IS NULL OR FechaAlta >= FechaIngreso)
 );
+GO
+
+ALTER TABLE Hospitalizacion.Hospitalizaciones
+ADD CONSTRAINT FK_Hospitalizaciones_Pacientes
+FOREIGN KEY (PacienteID) REFERENCES Paciente.Pacientes(PacienteID);
+
+ALTER TABLE Hospitalizacion.Hospitalizaciones
+ADD CONSTRAINT FK_Hospitalizaciones_Habitaciones
+FOREIGN KEY (HabitacionID) REFERENCES Hospitalizacion.Habitaciones(HabitacionID);
 
 CREATE INDEX IDX_Hospitalizaciones_Paciente ON Hospitalizacion.Hospitalizaciones(PacienteID);
 CREATE INDEX IDX_Hospitalizaciones_Habitacion ON Hospitalizacion.Hospitalizaciones(HabitacionID);
+GO
 
 
 CREATE SCHEMA Factura;
@@ -201,36 +249,57 @@ GO
 
 CREATE TABLE Factura.Facturas (
     FacturaID INT IDENTITY(1,1) PRIMARY KEY,
-    PacienteID INT NOT NULL FOREIGN KEY REFERENCES Paciente.Pacientes(PacienteID),
+    PacienteID INT NOT NULL,
     FechaFactura DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     TotalFactura DECIMAL(18,2) NOT NULL CHECK (TotalFactura >= 0),
     EstadoPago VARCHAR(20) NOT NULL CHECK (EstadoPago IN ('Pagado', 'Pendiente', 'Anulado')),
     Detalles XML NULL
 );
+GO
+
+ALTER TABLE Factura.Facturas
+ADD CONSTRAINT FK_Facturas_Pacientes
+FOREIGN KEY (PacienteID) REFERENCES Paciente.Pacientes(PacienteID);
 
 CREATE TABLE Factura.Pagos (
     PagoID INT IDENTITY(1,1) PRIMARY KEY,
-    FacturaID INT NOT NULL FOREIGN KEY REFERENCES Factura.Facturas(FacturaID),
+    FacturaID INT NOT NULL,
     FechaPago DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     MontoPagado DECIMAL(18,2) NOT NULL CHECK (MontoPagado >= 0),
     MetodoPago VARCHAR(20) NOT NULL CHECK (MetodoPago IN ('Efectivo', 'Tarjeta', 'Transferencia'))
 );
+GO
+
+ALTER TABLE Factura.Pagos
+ADD CONSTRAINT FK_Pagos_Facturas
+FOREIGN KEY (FacturaID) REFERENCES Factura.Facturas(FacturaID);
 
 CREATE INDEX IDX_Facturas_Paciente ON Factura.Facturas(PacienteID);
+GO
 
 
 CREATE TABLE Medico.Consultas (
     ConsultaID INT IDENTITY(1,1) PRIMARY KEY,
-    PacienteID INT NOT NULL FOREIGN KEY REFERENCES Paciente.Pacientes(PacienteID),
-    MedicoID INT NOT NULL FOREIGN KEY REFERENCES Medico.Medicos(MedicoID),
+    PacienteID INT NOT NULL,
+    MedicoID INT NOT NULL,
     FechaConsulta DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-    MotivoConsulta VARCHAR(MAX) NULL,
-    Diagnostico VARCHAR(MAX) NULL,
-    Prescripcion XML NULL  -- Uso de XML para prescripciones
+    MotivoConsulta TEXT NULL,
+    Diagnostico TEXT NULL,
+    Prescripcion XML NULL
 );
+GO
+
+ALTER TABLE Medico.Consultas
+ADD CONSTRAINT FK_Consultas_Pacientes
+FOREIGN KEY (PacienteID) REFERENCES Paciente.Pacientes(PacienteID);
+
+ALTER TABLE Medico.Consultas
+ADD CONSTRAINT FK_Consultas_Medicos
+FOREIGN KEY (MedicoID) REFERENCES Medico.Medicos(MedicoID);
 
 CREATE INDEX IDX_Consultas_Medico ON Medico.Consultas(MedicoID);
 CREATE INDEX IDX_Consultas_Paciente ON Medico.Consultas(PacienteID);
+GO
 
 
 CREATE SCHEMA Farmacia;
@@ -242,8 +311,13 @@ CREATE TABLE Farmacia.Proveedores (
     Contacto VARCHAR(100) NULL,
     Telefono VARCHAR(20) NULL,
     Email VARCHAR(100) NULL,
-    DireccionID INT NULL FOREIGN KEY REFERENCES dbo.Direcciones(DireccionID)
+    DireccionID INT NULL
 );
+GO
+
+ALTER TABLE Farmacia.Proveedores
+ADD CONSTRAINT FK_Proveedores_Direcciones
+FOREIGN KEY (DireccionID) REFERENCES dbo.Direcciones(DireccionID);
 
 CREATE TABLE Farmacia.Medicamentos (
     MedicamentoID INT IDENTITY(1,1) PRIMARY KEY,
@@ -251,11 +325,17 @@ CREATE TABLE Farmacia.Medicamentos (
     Descripcion VARCHAR(500) NULL,
     Precio DECIMAL(10,2) NOT NULL CHECK (Precio >= 0),
     Stock INT NOT NULL CHECK (Stock >= 0),
-    ProveedorID INT NULL FOREIGN KEY REFERENCES Farmacia.Proveedores(ProveedorID),
+    ProveedorID INT NULL,
     FechaRegistro DATETIME2 DEFAULT SYSDATETIME()
 );
+GO
+
+ALTER TABLE Farmacia.Medicamentos
+ADD CONSTRAINT FK_Medicamentos_Proveedores
+FOREIGN KEY (ProveedorID) REFERENCES Farmacia.Proveedores(ProveedorID);
 
 CREATE INDEX IDX_Medicamentos_Nombre ON Farmacia.Medicamentos(NombreMedicamento);
+GO
 
 
 CREATE SCHEMA Laboratorio;
@@ -267,38 +347,55 @@ CREATE TABLE Laboratorio.Examenes (
     Descripcion VARCHAR(500) NULL,
     Precio DECIMAL(10,2) NOT NULL CHECK (Precio >= 0)
 );
+GO
 
 CREATE TABLE Laboratorio.Resultados (
     ResultadoID INT IDENTITY(1,1) PRIMARY KEY,
-    ExamenID INT NOT NULL FOREIGN KEY REFERENCES Laboratorio.Examenes(ExamenID),
-    PacienteID INT NOT NULL FOREIGN KEY REFERENCES Paciente.Pacientes(PacienteID),
+    ExamenID INT NOT NULL,
+    PacienteID INT NOT NULL,
     FechaExamen DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     Resultados XML NULL,
-    Observaciones VARCHAR(MAX) NULL
+    Observaciones TEXT NULL
 );
+GO
+
+ALTER TABLE Laboratorio.Resultados
+ADD CONSTRAINT FK_Resultados_Examenes
+FOREIGN KEY (ExamenID) REFERENCES Laboratorio.Examenes(ExamenID);
+
+ALTER TABLE Laboratorio.Resultados
+ADD CONSTRAINT FK_Resultados_Pacientes
+FOREIGN KEY (PacienteID) REFERENCES Paciente.Pacientes(PacienteID);
 
 CREATE INDEX IDX_Resultados_Paciente ON Laboratorio.Resultados(PacienteID);
+GO
 
 
-CREATE VIEW Medico.vw_MedicosConsultas
+CREATE OR ALTER VIEW Medico.vw_MedicosConsultas
+WITH SCHEMABINDING
 AS
 SELECT 
     m.MedicoID,
-    CONCAT(m.Nombre, ' ', m.Apellido) AS NombreCompleto,
+    m.Nombre + ' ' + m.Apellido AS NombreCompleto,
     e.NombreEspecialidad,
-    COUNT(c.ConsultaID) AS NumeroConsultas,
-    SUM(cast(c.Prescripcion.value('(//CostoMedicamento)[1]', 'decimal(10,2)') AS DECIMAL(10,2))) AS TotalPrescripciones
+    COUNT_BIG(c.ConsultaID) AS NumeroConsultas,
+    SUM(ISNULL(c.Prescripcion.value('(//CostoMedicamento)[1]', 'decimal(10,2)'), 0)) AS TotalPrescripciones
 FROM Medico.Medicos m
-LEFT JOIN Medico.Especialidades e ON m.EspecialidadID = e.EspecialidadID
+INNER JOIN Medico.Especialidades e ON m.EspecialidadID = e.EspecialidadID
 LEFT JOIN Medico.Consultas c ON m.MedicoID = c.MedicoID
 GROUP BY m.MedicoID, m.Nombre, m.Apellido, e.NombreEspecialidad;
+GO
+
+CREATE UNIQUE CLUSTERED INDEX IDX_vw_MedicosConsultas ON Medico.vw_MedicosConsultas(MedicoID);
+GO
 
 
-CREATE VIEW Paciente.vw_PacientesHospitalizaciones
+CREATE OR ALTER VIEW Paciente.vw_PacientesHospitalizaciones
+WITH SCHEMABINDING
 AS
 SELECT 
     p.PacienteID,
-    CONCAT(p.Nombre, ' ', p.Apellido) AS NombreCompleto,
+    p.Nombre + ' ' + p.Apellido AS NombreCompleto,
     h.HospitalizacionID,
     h.FechaIngreso,
     h.FechaAlta,
@@ -311,33 +408,17 @@ FROM Paciente.Pacientes p
 INNER JOIN Hospitalizacion.Hospitalizaciones h ON p.PacienteID = h.PacienteID
 INNER JOIN Hospitalizacion.Habitaciones ha ON h.HabitacionID = ha.HabitacionID
 INNER JOIN Hospitalizacion.TiposHabitacion th ON ha.TipoHabitacionID = th.TipoHabitacionID;
+GO
 
 
-CREATE VIEW Factura.vw_FacturasDetalle
-AS
-SELECT 
-    f.FacturaID,
-    CONCAT(p.Nombre, ' ', p.Apellido) AS Paciente,
-    f.FechaFactura,
-    f.TotalFactura,
-    f.EstadoPago,
-    pg.MontoPagado,
-    pg.FechaPago,
-    pg.MetodoPago,
-    f.Detalles
-FROM Factura.Facturas f
-INNER JOIN Paciente.Pacientes p ON f.PacienteID = p.PacienteID
-LEFT JOIN Factura.Pagos pg ON f.FacturaID = pg.FacturaID;
-
-
-CREATE FUNCTION Medico.fn_HonorariosMedicos (@FechaInicio DATETIME2, @FechaFin DATETIME2)
+CREATE OR ALTER FUNCTION Medico.fn_HonorariosMedicos (@FechaInicio DATETIME2, @FechaFin DATETIME2)
 RETURNS TABLE
 AS
 RETURN
 (
     SELECT 
         m.MedicoID,
-        CONCAT(m.Nombre, ' ', m.Apellido) AS NombreCompleto,
+        m.Nombre + ' ' + m.Apellido AS NombreCompleto,
         e.NombreEspecialidad,
         COUNT(c.ConsultaID) AS NumeroConsultas,
         SUM(m.HonorariosConsulta) AS TotalHonorariosConsultas
@@ -347,9 +428,10 @@ RETURN
     WHERE c.FechaConsulta BETWEEN @FechaInicio AND @FechaFin
     GROUP BY m.MedicoID, m.Nombre, m.Apellido, e.NombreEspecialidad
 );
+GO
 
 
-CREATE FUNCTION Farmacia.fn_StockMedicamentos ()
+CREATE OR ALTER FUNCTION Farmacia.fn_StockMedicamentos ()
 RETURNS TABLE
 AS
 RETURN
@@ -364,18 +446,20 @@ RETURN
     LEFT JOIN Farmacia.Proveedores p ON m.ProveedorID = p.ProveedorID
     WHERE m.Stock > 0
 );
+GO
 
 
-CREATE FUNCTION Paciente.fn_CalcularEdad (@FechaNacimiento DATE)
+CREATE OR ALTER FUNCTION Paciente.fn_CalcularEdad (@FechaNacimiento DATE)
 RETURNS INT
 AS
 BEGIN
     RETURN DATEDIFF(YEAR, @FechaNacimiento, GETDATE()) - 
            CASE WHEN DATEADD(YEAR, DATEDIFF(YEAR, @FechaNacimiento, GETDATE()), @FechaNacimiento) > GETDATE() THEN 1 ELSE 0 END;
 END;
+GO
 
 
-CREATE FUNCTION Hospitalizacion.fn_CostoEstancia (@HospitalizacionID INT)
+CREATE OR ALTER FUNCTION Hospitalizacion.fn_CostoEstancia (@HospitalizacionID INT)
 RETURNS DECIMAL(18,2)
 AS
 BEGIN
@@ -388,9 +472,10 @@ BEGIN
 
     RETURN ISNULL(@Costo, 0);
 END;
+GO
 
 
-CREATE FUNCTION Farmacia.fn_VerificarStock (@MedicamentoID INT)
+CREATE OR ALTER FUNCTION Farmacia.fn_VerificarStock (@MedicamentoID INT)
 RETURNS BIT
 AS
 BEGIN
@@ -399,9 +484,10 @@ BEGIN
 
     RETURN CASE WHEN @Stock > 0 THEN 1 ELSE 0 END;
 END;
+GO
 
 
-CREATE FUNCTION Factura.fn_TotalPagado (@FacturaID INT)
+CREATE OR ALTER FUNCTION Factura.fn_TotalPagado (@FacturaID INT)
 RETURNS DECIMAL(18,2)
 AS
 BEGIN
@@ -410,24 +496,26 @@ BEGIN
 
     RETURN ISNULL(@TotalPagado, 0);
 END;
+GO
 
 
-CREATE FUNCTION Laboratorio.fn_ObtenerResultados (@ResultadoID INT)
-RETURNS VARCHAR(MAX)
+CREATE OR ALTER FUNCTION Laboratorio.fn_ObtenerResultados (@ResultadoID INT)
+RETURNS NVARCHAR(MAX)
 AS
 BEGIN
     DECLARE @Resultados XML;
     SELECT @Resultados = Resultados FROM Laboratorio.Resultados WHERE ResultadoID = @ResultadoID;
 
-    RETURN (SELECT @Resultados FOR XML RAW, ROOT('Resultados'), TYPE).value('.', 'VARCHAR(MAX)');
+    RETURN CAST(@Resultados AS NVARCHAR(MAX));
 END;
+GO
 
 
-CREATE PROCEDURE Hospitalizacion.sp_RegistrarHospitalizacion 
+CREATE OR ALTER PROCEDURE Hospitalizacion.sp_RegistrarHospitalizacion 
     @PacienteID INT,
     @HabitacionID INT,
     @FechaIngreso DATETIME2,
-    @Diagnostico VARCHAR(MAX)
+    @Diagnostico NVARCHAR(MAX)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -436,9 +524,7 @@ BEGIN
         -- Verificar disponibilidad de la habitación
         IF NOT EXISTS (SELECT 1 FROM Hospitalizacion.Habitaciones WHERE HabitacionID = @HabitacionID AND Disponible = 1)
         BEGIN
-            RAISERROR('La habitación no está disponible.', 16, 1);
-            ROLLBACK TRANSACTION;
-            RETURN;
+            THROW 50001, 'La habitación no está disponible.', 1;
         END
 
         -- Registrar hospitalización
@@ -452,14 +538,14 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR(@ErrorMessage, 16, 1);
+        THROW;
     END CATCH
 END;
+GO
 
 
 
-CREATE PROCEDURE Hospitalizacion.sp_DarAltaHospitalizacion 
+CREATE OR ALTER PROCEDURE Hospitalizacion.sp_DarAltaHospitalizacion 
     @HospitalizacionID INT,
     @FechaAlta DATETIME2
 AS
@@ -470,9 +556,7 @@ BEGIN
         -- Verificar que la hospitalización está activa
         IF NOT EXISTS (SELECT 1 FROM Hospitalizacion.Hospitalizaciones WHERE HospitalizacionID = @HospitalizacionID AND Estado = 'Activo')
         BEGIN
-            RAISERROR('La hospitalización no está activa o no existe.', 16, 1);
-            ROLLBACK TRANSACTION;
-            RETURN;
+            THROW 50002, 'La hospitalización no está activa o no existe.', 1;
         END
 
         DECLARE @HabitacionID INT;
@@ -490,13 +574,14 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR(@ErrorMessage, 16, 1);
+        THROW;
     END CATCH
 END;
+GO
 
 
-CREATE PROCEDURE Factura.sp_GenerarFacturaHospitalizacion 
+
+CREATE OR ALTER PROCEDURE Factura.sp_GenerarFacturaHospitalizacion 
     @HospitalizacionID INT
 AS
 BEGIN
@@ -518,13 +603,13 @@ BEGIN
         INSERT INTO Factura.Facturas (PacienteID, TotalFactura, EstadoPago)
         VALUES (@PacienteID, @TotalFactura, 'Pendiente');
 
-        -- Actualizar estado de hospitalización si es necesario
-
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR(@ErrorMessage, 16, 1);
+        THROW;
     END CATCH
 END;
+GO
+
+
