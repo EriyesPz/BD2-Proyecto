@@ -1,4 +1,4 @@
-import { Table, InputText, Label } from "../../components/ui";
+import { Table, InputText, Label, InputDate } from "../../components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import styled from "styled-components";
 
@@ -60,6 +60,7 @@ const datos = [
 export const PaginaTabla = () => {
   return (
     <ContenedorPagina>
+      <InputDate/>
       <Titulo>Lista de Pacientes</Titulo>
       <BarraBusqueda>
         <Label>Buscar Paciente:</Label>
