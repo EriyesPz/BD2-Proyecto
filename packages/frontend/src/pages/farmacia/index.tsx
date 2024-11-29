@@ -1,0 +1,1 @@
+export { Medicamentos } from "./medicamentos";
