@@ -13,7 +13,7 @@ import { ListaFacturas } from "./pages/facturas";
 import { Factura } from "./pages/factura";
 import { Pago } from "./pages/pago";
 import { Medicamentos, RegistroMedicamento } from "./pages/farmacia";
-import { ListaExamenes, PacienteResultado } from "./pages/laboratorio";
+import { ListaExamenes, PacienteResultado, ExamenResultado } from "./pages/laboratorio";
 
 export const App: React.FC = () => {
   return (
@@ -36,6 +36,7 @@ export const App: React.FC = () => {
         <Route path="/registrar-medicamento" element={<RegistroMedicamento/>}/>
         <Route path="/examenes" element={<ListaExamenes/>}/>
         <Route path="/paciente-resultados" element={<PacienteResultado/>}/>
+        <Route path="/registrar-resultado" element={<ExamenResultado/>}/>
       </Routes>
     </Router>
   );
