@@ -8,6 +8,7 @@ import { RegistarDoctor } from "./pages/registrar-doctor";
 import { DoctorPerfil } from "./pages/doctor";
 import { Hospitalizacion } from "./pages/hospitalizacion";
 import { HospitalizationDetalle } from "./pages/detalle-hospitalizacion";
+import { FormularioHospitalizacion } from "./pages/registro-hospitalizacion";
 
 export const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ export const App: React.FC = () => {
         <Route path="/doctor" element={<DoctorPerfil />}/>
         <Route path="/hospitalizacion" element={<Hospitalizacion/>}/>
         <Route path="/detalle-hospitalizacion" element={<HospitalizationDetalle/>}/>
+        <Route path="/registrar-hospitalizacion" element={<FormularioHospitalizacion/>}/>
       </Routes>
     </Router>
   );
