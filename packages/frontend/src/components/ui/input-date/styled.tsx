@@ -25,9 +25,3 @@ export const Input = styled.input`
     color: #aaa;
   }
 `;
-
-export const IconoCalendario = styled.div`
-  font-size: 18px;
-  color: #555;
-  cursor: pointer;
-`;

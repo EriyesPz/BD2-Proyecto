@@ -1,17 +1,15 @@
-import React, { useState } from "react";
-import { IconoCalendario, Input, Wrapper } from "./styled";
+import React from "react";
+import { Input, Wrapper } from "./styled";
 
 interface InputDateProps {
+  value: string;
+  onChange: (date: string) => void;
   placeholder?: string;
-  onChange?: (date: string) => void;
 }
 
-const InputDate: React.FC<InputDateProps> = ({ placeholder = "mm/dd/yyyy", onChange }) => {
-  const [value, setValue] = useState("");
-
+const InputDate: React.FC<InputDateProps> = ({ value, onChange, placeholder = "mm/dd/yyyy" }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-    if (onChange) onChange(e.target.value);
+    onChange(e.target.value);
   };
 
   return (
@@ -22,7 +20,6 @@ const InputDate: React.FC<InputDateProps> = ({ placeholder = "mm/dd/yyyy", onCha
         onChange={handleChange}
         placeholder={placeholder}
       />
-      <IconoCalendario></IconoCalendario>
     </Wrapper>
   );
 };
