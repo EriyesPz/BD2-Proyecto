@@ -4,3 +4,4 @@ export { Label } from "./label";
 export { Table } from "./table";
 export { InputDate } from "./input-date";
 export { Select } from "./select";
+export { Chart } from "./chart";

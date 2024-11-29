@@ -19,6 +19,7 @@
     "react-dom": "^18.3.1",
     "react-material-symbols": "^4.4.0",
     "react-router-dom": "^6.28.0",
+    "recharts": "^2.13.3",
     "styled-components": "^6.1.13",
     "vite-plugin-svgr": "^4.3.0"
   },
