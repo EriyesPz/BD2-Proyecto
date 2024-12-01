@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Button, InputDate, InputText, Label, Select } from "../../components/ui";
+import { Button, InputDate, InputText, Label, Select } from "../../../components/ui";
 
 const pacientes = [
   { id: 1, nombre: "Juan Pérez" },

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, InputDate, InputText, Label, Select } from "../../components/ui";
+import { useState } from "react";
+import { Button, InputDate, InputText, Label, Select } from "../../../components/ui";
 import styled from "styled-components";
 
 const Card = styled.div`
@@ -52,15 +52,20 @@ const FullWidth = styled.div`
 
 export const RegistroPaciente = () => {
   const [insuranceProviders, setInsuranceProviders] = useState([
-    "Provider A",
-    "Provider B",
-    "Provider C",
+    { value: "Provider A", label: "Provider A" },
+    { value: "Provider B", label: "Provider B" },
+    { value: "Provider C", label: "Provider C" },
   ]);
+  const [birthDate, setBirthDate] = useState("");
+  const [insuranceExpiryDate, setInsuranceExpiryDate] = useState("");
 
   const addNewInsuranceProvider = () => {
     const newProvider = prompt("Enter new insurance provider name:");
     if (newProvider) {
-      setInsuranceProviders([...insuranceProviders, newProvider]);
+      setInsuranceProviders([
+        ...insuranceProviders,
+        { value: newProvider, label: newProvider },
+      ]);
     }
   };
 
@@ -84,12 +89,19 @@ export const RegistroPaciente = () => {
             </div>
             <div>
               <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
-              <InputDate />
+              <InputDate
+                value={birthDate}
+                onChange={(value) => setBirthDate(value)}
+              />
             </div>
             <div>
               <Label htmlFor="genero">Género</Label>
               <Select
-                options={["Masculino", "Femenino", "Otro"]}
+                options={[
+                  { value: "Masculino", label: "Masculino" },
+                  { value: "Femenino", label: "Femenino" },
+                  { value: "Otro", label: "Otro" },
+                ]}
                 placeholder="Seleccionar género"
               />
             </div>
@@ -142,7 +154,6 @@ export const RegistroPaciente = () => {
             <div>
               <Label htmlFor="aseguradora">Aseguradora</Label>
               <Select
-                id="aseguradora"
                 options={insuranceProviders}
                 placeholder="Seleccionar aseguradora"
               />
@@ -153,7 +164,10 @@ export const RegistroPaciente = () => {
             </div>
             <div>
               <Label htmlFor="fechaVencimiento">Fecha de Vencimiento</Label>
-              <InputDate />
+              <InputDate
+                value={insuranceExpiryDate}
+                onChange={(value) => setInsuranceExpiryDate(value)}
+              />
             </div>
             <div className="flex items-end">
               <Button type="button" onClick={addNewInsuranceProvider}>
@@ -165,12 +179,10 @@ export const RegistroPaciente = () => {
 
         {/* Footer */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-          <Button type="button">
-            Cancelar
-          </Button>
+          <Button type="button">Cancelar</Button>
           <Button type="submit">Guardar</Button>
         </div>
       </form>
     </Card>
   );
-}
+};

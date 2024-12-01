@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Label, InputText, Button, Select } from "../../components/ui";
+import { Label, InputText, Button, Select } from "../../../components/ui";
 import styled from "styled-components";
 
 const specialties = [

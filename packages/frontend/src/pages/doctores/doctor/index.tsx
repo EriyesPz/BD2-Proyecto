@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Button, Label, Chart } from "../../components/ui";
+import { Button, Label, Chart } from "../../../components/ui";
 
 const chartData = [
   { month: "Ene", consultas: 65 },

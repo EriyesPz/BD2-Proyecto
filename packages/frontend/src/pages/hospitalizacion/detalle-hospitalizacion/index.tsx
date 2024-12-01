@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Button, Table } from "../../components/ui";
+import { Button, Table } from "../../../components/ui";
 
 // Datos de ejemplo
 const patient = {

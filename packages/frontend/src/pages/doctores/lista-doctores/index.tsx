@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Select, InputText, Label } from "../../components/ui";
+import { Table, Select, InputText, Label } from "../../../components/ui";
 import styled from "styled-components";
 
 type DoctorType = "internal" | "external";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { Table, Button } from "../../components/ui";
+import { Table, Button } from "../../../components/ui";
 
 // Estilización con styled-components
 const Container = styled.div`
