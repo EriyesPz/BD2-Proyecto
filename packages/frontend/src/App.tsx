@@ -15,6 +15,7 @@ import {
   ExamenResultado,
 } from "./pages/laboratorio";
 import { AgendaConsulta, ProgramacionConsulta, RegistroConsulta } from "./pages/consultas";
+import { HonorariosMedicos } from "./pages/reportes";
 
 export const App: React.FC = () => {
   return (
@@ -51,6 +52,7 @@ export const App: React.FC = () => {
         <Route path="/agendar-consulta" element={<AgendaConsulta/>} />
         <Route path="/programar-consulta" element={<ProgramacionConsulta/>} />
         <Route path="/registrar-consulta" element={<RegistroConsulta/>} />
+        <Route path="/honorarios-medicos" element={<HonorariosMedicos/>} />
       </Routes>
     </Router>
   );
