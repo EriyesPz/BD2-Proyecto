@@ -1,4 +1,3 @@
--- Crear la base de datos si no existe
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'Hospital')
 BEGIN
     CREATE DATABASE Hospital;
@@ -12,7 +11,6 @@ GO
 CREATE SCHEMA Usuarios;
 GO
 
--- Crear secuencia para generar EmpleadoID
 CREATE SEQUENCE Usuarios.EmpleadoIDSeq
     START WITH 1
     INCREMENT BY 1
@@ -29,7 +27,7 @@ CREATE TABLE Usuarios.Usuarios (
     Email VARCHAR(100) NOT NULL UNIQUE,
     Usuario VARCHAR(50),
     Rol VARCHAR(50) NOT NULL,
-    Contrasenia VARCHAR(255) NOT NULL,  -- Encriptar contraseñas
+    Contrasenia VARCHAR(255) NOT NULL,
     Token VARCHAR(256),
     TokenFecha DATETIME2,
     Creado DATETIME2 DEFAULT SYSDATETIME(),
@@ -37,7 +35,6 @@ CREATE TABLE Usuarios.Usuarios (
 );
 GO
 
--- Agregar índice para mejorar búsquedas por email
 CREATE INDEX IDX_Usuarios_Email ON Usuarios.Usuarios(Email);
 GO
 
@@ -521,13 +518,11 @@ BEGIN
     SET NOCOUNT ON;
     BEGIN TRANSACTION;
     BEGIN TRY
-        -- Verificar disponibilidad de la habitación
         IF NOT EXISTS (SELECT 1 FROM Hospitalizacion.Habitaciones WHERE HabitacionID = @HabitacionID AND Disponible = 1)
         BEGIN
             THROW 50001, 'La habitación no está disponible.', 1;
         END
 
-        -- Registrar hospitalización
         INSERT INTO Hospitalizacion.Hospitalizaciones (PacienteID, HabitacionID, FechaIngreso, Diagnostico, Estado)
         VALUES (@PacienteID, @HabitacionID, @FechaIngreso, @Diagnostico, 'Activo');
 
@@ -553,7 +548,6 @@ BEGIN
     SET NOCOUNT ON;
     BEGIN TRANSACTION;
     BEGIN TRY
-        -- Verificar que la hospitalización está activa
         IF NOT EXISTS (SELECT 1 FROM Hospitalizacion.Hospitalizaciones WHERE HospitalizacionID = @HospitalizacionID AND Estado = 'Activo')
         BEGIN
             THROW 50002, 'La hospitalización no está activa o no existe.', 1;
@@ -562,12 +556,10 @@ BEGIN
         DECLARE @HabitacionID INT;
         SELECT @HabitacionID = HabitacionID FROM Hospitalizacion.Hospitalizaciones WHERE HospitalizacionID = @HospitalizacionID;
 
-        -- Actualizar hospitalización
         UPDATE Hospitalizacion.Hospitalizaciones 
         SET FechaAlta = @FechaAlta, Estado = 'Alta' 
         WHERE HospitalizacionID = @HospitalizacionID;
 
-        -- Actualizar disponibilidad de la habitación
         UPDATE Hospitalizacion.Habitaciones SET Disponible = 1 WHERE HabitacionID = @HabitacionID;
 
         COMMIT TRANSACTION;
@@ -592,14 +584,11 @@ BEGIN
 
         SELECT @PacienteID = PacienteID FROM Hospitalizacion.Hospitalizaciones WHERE HospitalizacionID = @HospitalizacionID;
 
-        -- Calcular costo de estancia
         SELECT @TotalEstancia = Hospitalizacion.fn_CostoEstancia(@HospitalizacionID);
 
-        -- Otros cargos pueden ser agregados aquí (medicamentos, exámenes, etc.)
 
-        SET @TotalFactura = @TotalEstancia;  -- Sumar otros cargos si existen
+        SET @TotalFactura = @TotalEstancia;
 
-        -- Crear factura
         INSERT INTO Factura.Facturas (PacienteID, TotalFactura, EstadoPago)
         VALUES (@PacienteID, @TotalFactura, 'Pendiente');
 
