@@ -48,62 +48,65 @@ const router = Router();
 router.post("/login", ctlAuth);
 
 router.get("/usuarios", ctlUsuarios);
-router.post("/usuarios", ctlInsertarUsuario);
+router.post("/usuario", ctlInsertarUsuario);
 
 router.get("/direcciones", ctlObtenerDirecciones);
-router.post("/direcciones", ctlInsertarDireccion);
+router.post("/direccion", ctlInsertarDireccion);
 
 router.get("/especialidades", ctlObtenerEspecialidades);
-router.post("/especialidades", ctlInsertarEspecialidad);
+router.post("/especialidad", ctlInsertarEspecialidad);
 
 router.get("/seguros-medicos", ctlObtenerSegurosMedicos);
-router.post("/seguros-medicos", ctlInsertarSeguroMedico);
+router.post("/seguro-medico", ctlInsertarSeguroMedico);
 
 router.get("/puestos", ctlObtenerPuestos);
-router.post("/puestos", ctlInsertarPuesto);
+router.post("/puesto", ctlInsertarPuesto);
 
 router.get("/tipos-habitacion", ctlObtenerTiposHabitacion);
-router.post("/tipos-habitacion", ctlInsertarTipoHabitacion);
+router.post("/tipo-habitacion", ctlInsertarTipoHabitacion);
 
 router.get("/proveedores", ctlObtenerProveedores);
-router.post("/proveedores", ctlInsertarProveedor);
+router.post("/proveedor", ctlInsertarProveedor);
 
 router.get("/examenes", ctlObtenerExamenes);
-router.post("/examenes", ctlInsertarExamen);
+router.post("/examen", ctlInsertarExamen);
 
 router.get("/medicos", ctlObtenerMedicos);
-router.post("/medicos", ctlInsertarMedico);
+router.post("/medico", ctlInsertarMedico);
 
 router.get("/pacientes", ctlObtenerPacientes);
-router.post("/pacientes", ctlInsertarPaciente);
+router.post("/paciente", ctlInsertarPaciente);
 
 router.get("/empleados", ctlObtenerEmpleados);
-router.post("/empleados", ctlInsertarEmpleado);
+router.post("/empleado", ctlInsertarEmpleado);
 
 router.get("/medicamentos", ctlObtenerMedicamentos);
-router.post("/medicamentos", ctlInsertarMedicamento);
+router.post("/medicamento", ctlInsertarMedicamento);
 
 router.get("/habitaciones", ctlObtenerHabitaciones);
-router.post("/habitaciones", ctlInsertarHabitacion);
+router.post("/habitacion", ctlInsertarHabitacion);
 
 router.get("/pacientes-seguros", ctlObtenerPacientesSeguros);
-router.post("/pacientes-seguros", ctlInsertarPacienteSeguro);
+router.post("/paciente-seguro", ctlInsertarPacienteSeguro);
 
 router.get("/hospitalizaciones", ctlObtenerHospitalizaciones);
-router.post("/hospitalizaciones", ctlRegistrarHospitalizacion);
+router.post("/hospitalizacion", ctlRegistrarHospitalizacion);
 router.post("/hospitalizaciones/alta", ctlDarAltaHospitalizacion);
 
 router.get("/consultas-medicas", ctlObtenerConsultasMedicas);
-router.post("/consultas-medicas", ctlInsertarConsultaMedica);
+router.post("/consulta-medica", ctlInsertarConsultaMedica);
 
 router.get("/resultados-laboratorio", ctlObtenerResultadosLaboratorio);
-router.post("/resultados-laboratorio", ctlInsertarResultadoLaboratorio);
+router.post("/resultado-laboratorio", ctlInsertarResultadoLaboratorio);
 
 router.get("/facturas", ctlObtenerFacturas);
-router.post("/facturas", ctlInsertarFactura);
+router.post("/factura", ctlInsertarFactura);
 
 router.post("/pagos", ctlInsertarPago);
 
-router.post("/facturas/generar-hospitalizacion", ctlGenerarFacturaHospitalizacion);
+router.post(
+  "/facturas/generar-hospitalizacion",
+  ctlGenerarFacturaHospitalizacion
+);
 
 export { router };

@@ -526,7 +526,6 @@ BEGIN
         INSERT INTO Hospitalizacion.Hospitalizaciones (PacienteID, HabitacionID, FechaIngreso, Diagnostico, Estado)
         VALUES (@PacienteID, @HabitacionID, @FechaIngreso, @Diagnostico, 'Activo');
 
-        -- Actualizar disponibilidad de la habitación
         UPDATE Hospitalizacion.Habitaciones SET Disponible = 0 WHERE HabitacionID = @HabitacionID;
 
         COMMIT TRANSACTION;
@@ -537,7 +536,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 
 
 CREATE OR ALTER PROCEDURE Hospitalizacion.sp_DarAltaHospitalizacion 
