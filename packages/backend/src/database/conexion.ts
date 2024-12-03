@@ -7,6 +7,7 @@ const dbConfiguracion = {
   user: Keys.DB.Usuario,
   password: Keys.DB.Contrasenia,
   port: parseInt(Keys.DB.Puerto),
+  
   options: {
     trustServerCertificate: true,
     trustedConnection: false,
