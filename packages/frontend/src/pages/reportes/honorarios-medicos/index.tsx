@@ -1,76 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import styled from "styled-components";
-import { Button, InputDate, Select, Label, Table } from "../../../components/ui";
+import { ButtonGroup, Container, FiltersContainer, Header, Section } from "./styled";
+import { Button, InputDate, Label, Table } from "../../../components/ui";
 import { FileText, FileSpreadsheet, Printer } from "lucide-react";
-
-// Mock data for demonstration
-const mockDoctors = [
-  { id: "1", name: "Dr. Juan Pérez" },
-  { id: "2", name: "Dra. María González" },
-  { id: "3", name: "Dr. Carlos Rodríguez" },
-];
-
-const mockSpecialties = [
-  { id: "1", name: "Cardiología" },
-  { id: "2", name: "Pediatría" },
-  { id: "3", name: "Dermatología" },
-];
-
-const mockResults = [
-  { id: "1", doctor: "Dr. Juan Pérez", specialty: "Cardiología", consultations: 25, totalFees: 2500 },
-  { id: "2", doctor: "Dra. María González", specialty: "Pediatría", consultations: 30, totalFees: 2700 },
-  { id: "3", doctor: "Dr. Carlos Rodríguez", specialty: "Dermatología", consultations: 20, totalFees: 2000 },
-];
-
-const Container = styled.div`
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Section = styled.div`
-  margin-bottom: 20px;
-`;
-
-const Header = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const FiltersContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-`;
+import { getHonorariosMedicos } from "../../../lib/api";
 
 export const HonorariosMedicos = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [selectedSpecialty, setSelectedSpecialty] = useState("");
-  const [results, setResults] = useState<typeof mockResults>([]);
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleGenerateReport = (e: React.FormEvent) => {
+  const handleGenerateReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate fetching filtered data
-    setResults(mockResults);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await getHonorariosMedicos(startDate, endDate);
+      setResults(data);
+    } catch (err) {
+      console.error("Error fetching honorarios médicos:", err);
+      setError("Hubo un error al generar el reporte. Por favor, inténtelo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleExportPDF = () => console.log("Exporting to PDF...");
-  const handleExportExcel = () => console.log("Exporting to Excel...");
+  const handleExportPDF = () => console.log("Exportando a PDF...");
+  const handleExportExcel = () => console.log("Exportando a Excel...");
   const handlePrint = () => window.print();
 
   return (
@@ -81,39 +40,11 @@ export const HonorariosMedicos = () => {
           <FiltersContainer>
             <div>
               <Label htmlFor="startDate">Desde</Label>
-              <InputDate
-                value={startDate}
-                onChange={setStartDate}
-              />
+              <InputDate value={startDate} onChange={setStartDate} />
             </div>
             <div>
               <Label htmlFor="endDate">Hasta</Label>
-              <InputDate
-                value={endDate}
-                onChange={setEndDate}
-              />
-            </div>
-            <div>
-              <Label htmlFor="doctor">Médico</Label>
-              <Select
-                options={mockDoctors.map((doctor) => ({
-                  value: doctor.id,
-                  label: doctor.name,
-                }))}
-                onChange={setSelectedDoctor}
-                placeholder="Seleccionar médico"
-              />
-            </div>
-            <div>
-              <Label htmlFor="specialty">Especialidad</Label>
-              <Select
-                options={mockSpecialties.map((specialty) => ({
-                  value: specialty.id,
-                  label: specialty.name,
-                }))}
-                onChange={setSelectedSpecialty}
-                placeholder="Seleccionar especialidad"
-              />
+              <InputDate value={endDate} onChange={setEndDate} />
             </div>
           </FiltersContainer>
           <Button type="submit" style={{ marginTop: "20px" }}>
@@ -121,20 +52,24 @@ export const HonorariosMedicos = () => {
           </Button>
         </Section>
       </form>
-      {results.length > 0 && (
+
+      {loading && <p>Cargando datos...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {!loading && results.length > 0 && (
         <>
           <Table
             columnas={[
-              { header: "Médico", accessorKey: "doctor" },
-              { header: "Especialidad", accessorKey: "specialty" },
-              { header: "Número de Consultas", accessorKey: "consultations" },
-              { header: "Total de Honorarios", accessorKey: "totalFees" },
+              { header: "Médico", accessorKey: "NombreCompleto" },
+              { header: "Especialidad", accessorKey: "NombreEspecialidad" },
+              { header: "Número de Consultas", accessorKey: "NumeroConsultas" },
+              { header: "Total de Honorarios", accessorKey: "TotalHonorariosConsultas" },
             ]}
             datos={results.map((row) => ({
-              doctor: row.doctor,
-              specialty: row.specialty,
-              consultations: row.consultations,
-              totalFees: `$${row.totalFees.toFixed(2)}`,
+              NombreCompleto: row.NombreCompleto,
+              NombreEspecialidad: row.NombreEspecialidad,
+              NumeroConsultas: row.NumeroConsultas,
+              TotalHonorariosConsultas: `$${row.TotalHonorariosConsultas.toFixed(2)}`,
             }))}
           />
           <ButtonGroup>

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { Layout } from "./components/layout/sidebar";
 import { LoginForm } from "../src/pages/login";
 import { Pacientes, PerfilPaciente, RegistroPaciente } from "./pages/paciente";
@@ -9,7 +9,7 @@ import {
   FormularioHospitalizacion,
 } from "./pages/hospitalizacion";
 import { ListaFacturas, Factura, Pago } from "./pages/facturacion";
-import { Medicamentos, RegistroMedicamento, GestionProveedores } from "./pages/farmacia";
+import { Medicamentos, RegistroMedicamento } from "./pages/farmacia";
 import {
   ListaExamenes,
   PacienteResultado,
@@ -23,7 +23,10 @@ export const App: React.FC = () => {
     <Router>
       <Routes>
         {/* Login */}
-        <Route path="/" element={<LoginForm />} />
+        <Route path="/login" element={<LoginForm />} />
+
+        {/* Redirigir la raíz a /pacientes */}
+        <Route path="/" element={<Navigate to="/pacientes" replace />} />
 
         {/* Layout with Sidebar */}
         <Route element={<Layout />}>
@@ -50,7 +53,6 @@ export const App: React.FC = () => {
           {/* Farmacia */}
           <Route path="/medicamentos" element={<Medicamentos />} />
           <Route path="/registrar-medicamento" element={<RegistroMedicamento />} />
-          <Route path="/proveedores" element={<GestionProveedores />} />
 
           {/* Laboratorio */}
           <Route path="/examenes" element={<ListaExamenes />} />

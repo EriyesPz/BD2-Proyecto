@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, FilterContainer, Header, Link } from "./styled";
+import { Container, FilterContainer, Header } from "./styled";
 import { InputText, Table, Button } from "../../../components/ui";
 import { getResultadosLaboratorio } from "../../../lib/api";
 

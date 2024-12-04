@@ -1,49 +1,37 @@
-import React, { useState } from 'react';
-import styled from "styled-components";
-import { Button, Table, Label } from "../../../components/ui";
+import React, { useState, useEffect } from "react";
+import { ButtonGroup, Container, Header, TableContainer } from "./styled";
+import { Button, Table } from "../../../components/ui";
 import { Loader2, FileDown, Printer } from "lucide-react";
 import * as XLSX from "xlsx";
-
-const Container = styled.div`
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Header = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-`;
-
-const TableContainer = styled.div`
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-`;
+import { getStockMedicamentos } from "../../../lib/api";
 
 interface Medicamento {
-  nombre: string;
-  stock: number;
-  precio: number;
-  proveedor: string;
+  MedicamentoID: number;
+  NombreMedicamento: string;
+  Stock: number;
+  Precio: number;
+  NombreProveedor: string | null;
 }
 
 export const ReporteInventarioMedicamentos = () => {
-  const [medicamentos] = useState<Medicamento[]>([
-    { nombre: "Paracetamol", stock: 100, precio: 5.0, proveedor: "Proveedor A" },
-    { nombre: "Ibuprofeno", stock: 50, precio: 7.5, proveedor: "Proveedor B" },
-    { nombre: "Amoxicilina", stock: 30, precio: 10.0, proveedor: "Proveedor C" },
-  ]);
+  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMedicamentos = async () => {
+      try {
+        const data = await getStockMedicamentos();
+        setMedicamentos(data);
+      } catch (err) {
+        console.error("Error al cargar los medicamentos:", err);
+        setError("Hubo un error al cargar los medicamentos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMedicamentos();
+  }, []);
 
   const exportToPDF = () => {
     const pdfWindow = window.open("", "_blank");
@@ -54,7 +42,7 @@ export const ReporteInventarioMedicamentos = () => {
       pdfWindow.document.write("<tr><th>Nombre del Medicamento</th><th>Stock Disponible</th><th>Precio</th><th>Proveedor</th></tr>");
       medicamentos.forEach((item) => {
         pdfWindow.document.write(
-          `<tr><td>${item.nombre}</td><td>${item.stock}</td><td>$${item.precio.toFixed(2)}</td><td>${item.proveedor}</td></tr>`
+          `<tr><td>${item.NombreMedicamento}</td><td>${item.Stock}</td><td>$${item.Precio.toFixed(2)}</td><td>${item.NombreProveedor || "Sin Proveedor"}</td></tr>`
         );
       });
       pdfWindow.document.write("</table>");
@@ -65,7 +53,14 @@ export const ReporteInventarioMedicamentos = () => {
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(medicamentos);
+    const worksheet = XLSX.utils.json_to_sheet(
+      medicamentos.map((item) => ({
+        NombreMedicamento: item.NombreMedicamento,
+        Stock: item.Stock,
+        Precio: `$${item.Precio.toFixed(2)}`,
+        Proveedor: item.NombreProveedor || "Sin Proveedor",
+      }))
+    );
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Inventario");
     XLSX.writeFile(workbook, "inventario-medicamentos.xlsx");
@@ -80,7 +75,7 @@ export const ReporteInventarioMedicamentos = () => {
       printWindow.document.write("<tr><th>Nombre del Medicamento</th><th>Stock Disponible</th><th>Precio</th><th>Proveedor</th></tr>");
       medicamentos.forEach((item) => {
         printWindow.document.write(
-          `<tr><td>${item.nombre}</td><td>${item.stock}</td><td>$${item.precio.toFixed(2)}</td><td>${item.proveedor}</td></tr>`
+          `<tr><td>${item.NombreMedicamento}</td><td>${item.Stock}</td><td>$${item.Precio.toFixed(2)}</td><td>${item.NombreProveedor || "Sin Proveedor"}</td></tr>`
         );
       });
       printWindow.document.write("</table>");
@@ -89,6 +84,24 @@ export const ReporteInventarioMedicamentos = () => {
       printWindow.print();
     }
   };
+
+  if (loading) {
+    return (
+      <Container>
+        <Header>Cargando...</Header>
+        <Loader2 className="animate-spin" />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Header>Error</Header>
+        <p>{error}</p>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -110,16 +123,16 @@ export const ReporteInventarioMedicamentos = () => {
       <TableContainer>
         <Table
           columnas={[
-            { header: "Nombre del Medicamento", accessorKey: "nombre" },
-            { header: "Stock Disponible", accessorKey: "stock" },
-            { header: "Precio", accessorKey: "precio" },
-            { header: "Proveedor", accessorKey: "proveedor" },
+            { header: "Nombre del Medicamento", accessorKey: "NombreMedicamento" },
+            { header: "Stock Disponible", accessorKey: "Stock" },
+            { header: "Precio", accessorKey: "Precio" },
+            { header: "Proveedor", accessorKey: "NombreProveedor" },
           ]}
           datos={medicamentos.map((item) => ({
-            nombre: item.nombre,
-            stock: item.stock,
-            precio: `$${item.precio.toFixed(2)}`,
-            proveedor: item.proveedor,
+            NombreMedicamento: item.NombreMedicamento,
+            Stock: item.Stock,
+            Precio: `$${item.Precio.toFixed(2)}`,
+            NombreProveedor: item.NombreProveedor || "Sin Proveedor",
           }))}
         />
       </TableContainer>

@@ -71,3 +71,4 @@ export {
   ctlInsertarSeguroMedico,
   ctlObtenerSegurosMedicos,
 } from "./segurosController";
+export { obtenerHonorarios } from "./honorariosController";

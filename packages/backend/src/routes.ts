@@ -53,7 +53,8 @@ import {
   ctlObtenerPacientePorID,
   ctlObtenerMedicoPorID,
   ctlObtenerHospitalizacionPorID,
-  ctlObtenerFacturaPorID
+  ctlObtenerFacturaPorID,
+  obtenerHonorarios
 } from "./controllers";
 
 const router = Router();
@@ -147,6 +148,8 @@ router.get(
   "/pacientes/resumen-hospitalizaciones",
   ctlObtenerResumenPacientesHospitalizaciones
 );
+
+router.get("/honorarios", obtenerHonorarios);
 
 router.get("/medicamentos/stock", ctlObtenerStockMedicamentos);
 

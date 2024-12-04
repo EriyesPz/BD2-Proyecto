@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { ActionsContainer, Container, Filters, Header } from "./styled";
-import {
-  Button,
-  InputText,
-  Select,
-  Table,
-  Label,
-} from "../../../components/ui";
+import { Button, InputText, Select, Table, Label } from "../../../components/ui";
 import { getMedicamentos } from "../../../lib/api";
 
 export const Medicamentos = () => {
@@ -35,13 +29,19 @@ export const Medicamentos = () => {
     fetchMedicamentos();
   }, []);
 
+  // Generar lista de proveedores (ignorar ProveedorID nulo)
   const proveedores = Array.from(
-    new Set(medicamentos.map((med) => med.ProveedorID))
+    new Set(
+      medicamentos
+        .filter((med) => med.ProveedorID !== null)
+        .map((med) => med.ProveedorID)
+    )
   ).map((proveedorID) => ({
     value: proveedorID.toString(),
     label: `Proveedor #${proveedorID}`,
   }));
 
+  // Filtrar medicamentos
   const medicamentosFiltrados = medicamentos.filter((med) => {
     const cumpleBusqueda = med.NombreMedicamento.toLowerCase().includes(
       busqueda.toLowerCase()
@@ -52,7 +52,8 @@ export const Medicamentos = () => {
       (filtroStock === "sin" && med.Stock === 0);
     const cumpleProveedor =
       filtroProveedor === "todos" ||
-      med.ProveedorID.toString() === filtroProveedor;
+      (med.ProveedorID !== null &&
+        med.ProveedorID.toString() === filtroProveedor);
 
     return cumpleBusqueda && cumpleStock && cumpleProveedor;
   });
@@ -109,7 +110,9 @@ export const Medicamentos = () => {
             descripcion: med.Descripcion,
             precio: `$${med.Precio.toFixed(2)}`,
             stock: med.Stock,
-            proveedor: `Proveedor #${med.ProveedorID}`,
+            proveedor: med.ProveedorID
+              ? `Proveedor #${med.ProveedorID}`
+              : "Sin Proveedor",
             acciones: (
               <div style={{ display: "flex", gap: "8px" }}>
                 <Button>Ver</Button>
