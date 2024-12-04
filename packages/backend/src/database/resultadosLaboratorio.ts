@@ -5,7 +5,7 @@ export const obtenerResultadosLaboratorio = async () => {
   try {
     const pool = await dbConexion();
     const consulta = `
-      SELECT * FROM Laboratorio.Resultados;
+      SELECT * FROM vw_ResultadosCompleta;
     `;
     const resultado = await pool.request().query(consulta);
     return resultado.recordset;
