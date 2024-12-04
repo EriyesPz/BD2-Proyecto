@@ -41,6 +41,15 @@ import {
   ctlObtenerTiposHabitacion,
   ctlRegistrarHospitalizacion,
   ctlUsuarios,
+  ctlCalcularEdadPaciente,
+  ctlObtenerCostoEstancia,
+  ctlObtenerHonorariosMedicos,
+  ctlObtenerResultadosLaboratorioPorID,
+  ctlObtenerResumenMedicosConsultas,
+  ctlObtenerResumenPacientesHospitalizaciones,
+  ctlObtenerStockMedicamentos,
+  ctlObtenerTotalPagado,
+  ctlVerificarStockMedicamento,
 } from "./controllers";
 
 const router = Router();
@@ -107,6 +116,36 @@ router.post("/pagos", ctlInsertarPago);
 router.post(
   "/facturas/generar-hospitalizacion",
   ctlGenerarFacturaHospitalizacion
+);
+
+router.get("/pacientes/calcular-edad", ctlCalcularEdadPaciente);
+
+router.get(
+  "/hospitalizaciones/:hospitalizacionID/costo-estancia",
+  ctlObtenerCostoEstancia
+);
+
+router.get("/medicos/honorarios", ctlObtenerHonorariosMedicos);
+
+router.get(
+  "/resultados-laboratorio/:resultadoID",
+  ctlObtenerResultadosLaboratorioPorID
+);
+
+router.get("/medicos/resumen-consultas", ctlObtenerResumenMedicosConsultas);
+
+router.get(
+  "/pacientes/resumen-hospitalizaciones",
+  ctlObtenerResumenPacientesHospitalizaciones
+);
+
+router.get("/medicamentos/stock", ctlObtenerStockMedicamentos);
+
+router.get("/facturas/:facturaID/total-pagado", ctlObtenerTotalPagado);
+
+router.get(
+  "/medicamentos/:medicamentoID/verificar-stock",
+  ctlVerificarStockMedicamento
 );
 
 export { router };

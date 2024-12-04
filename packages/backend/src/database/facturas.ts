@@ -82,3 +82,19 @@ export const generarFacturaHospitalizacion = async (
     throw new Error(`Error al generar factura de hospitalización: ${error}`);
   }
 };
+
+export const obtenerTotalPagado = async (facturaID: number) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT Factura.fn_TotalPagado(@FacturaID) AS TotalPagado;
+    `;
+    const resultado = await pool
+      .request()
+      .input("FacturaID", sql.Int, facturaID)
+      .query(consulta);
+    return resultado.recordset[0].TotalPagado;
+  } catch (error) {
+    throw new Error(`Error al obtener total pagado de la factura: ${error}`);
+  }
+};

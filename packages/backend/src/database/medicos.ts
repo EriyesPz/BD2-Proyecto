@@ -49,3 +49,44 @@ export const insertarMedico = async (
     throw new Error(`Error al insertar médico: ${error}`);
   }
 };
+
+export const obtenerResumenMedicosConsultas = async () => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT 
+        MedicoID,
+        NombreCompleto,
+        NombreEspecialidad,
+        NumeroConsultas,
+        TotalPrescripciones
+      FROM Medico.vw_MedicosConsultas;
+    `;
+    const resultado = await pool.request().query(consulta);
+    return resultado.recordset;
+  } catch (error) {
+    throw new Error(
+      `Error al obtener resumen de médicos y consultas: ${error}`
+    );
+  }
+};
+
+export const obtenerHonorariosMedicos = async (
+  fechaInicio: string,
+  fechaFin: string
+) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT * FROM Medico.fn_HonorariosMedicos(@FechaInicio, @FechaFin);
+    `;
+    const resultado = await pool
+      .request()
+      .input("FechaInicio", sql.DateTime2, fechaInicio)
+      .input("FechaFin", sql.DateTime2, fechaFin)
+      .query(consulta);
+    return resultado.recordset;
+  } catch (error) {
+    throw new Error(`Error al obtener honorarios de médicos: ${error}`);
+  }
+};

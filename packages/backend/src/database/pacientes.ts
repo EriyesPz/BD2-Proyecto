@@ -47,3 +47,45 @@ export const insertarPaciente = async (
     throw new Error(`Error al insertar paciente: ${error}`);
   }
 };
+
+export const obtenerResumenPacientesHospitalizaciones = async () => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT 
+        PacienteID,
+        NombreCompleto,
+        HospitalizacionID,
+        FechaIngreso,
+        FechaAlta,
+        Tipo,
+        DiasHospitalizado,
+        PrecioPorDia,
+        CostoEstancia,
+        Estado
+      FROM Paciente.vw_PacientesHospitalizaciones;
+    `;
+    const resultado = await pool.request().query(consulta);
+    return resultado.recordset;
+  } catch (error) {
+    throw new Error(
+      `Error al obtener resumen de pacientes y hospitalizaciones: ${error}`
+    );
+  }
+};
+
+export const calcularEdadPaciente = async (fechaNacimiento: string) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT Paciente.fn_CalcularEdad(@FechaNacimiento) AS Edad;
+    `;
+    const resultado = await pool
+      .request()
+      .input("FechaNacimiento", sql.Date, fechaNacimiento)
+      .query(consulta);
+    return resultado.recordset[0].Edad;
+  } catch (error) {
+    throw new Error(`Error al calcular edad del paciente: ${error}`);
+  }
+};

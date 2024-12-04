@@ -3,6 +3,7 @@ import {
   obtenerHospitalizaciones,
   registrarHospitalizacion,
   darAltaHospitalizacion,
+  obtenerCostoEstancia,
 } from "../database/hospitalizaciones";
 
 export const ctlObtenerHospitalizaciones = async (
@@ -51,6 +52,31 @@ export const ctlDarAltaHospitalizacion = async (
       .json({ mensaje: "Hospitalización dada de alta correctamente" });
   } catch (error) {
     console.error("Error al dar de alta la hospitalización:", error);
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
+export const ctlObtenerCostoEstancia = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { hospitalizacionID } = req.params;
+
+    if (!hospitalizacionID) {
+      res
+        .status(400)
+        .json({
+          mensaje:
+            "Debe proporcionar 'hospitalizacionID' en los parámetros de la ruta.",
+        });
+      return;
+    }
+
+    const costo = await obtenerCostoEstancia(parseInt(hospitalizacionID));
+    res.status(200).json({ costoEstancia: costo });
+  } catch (error) {
+    console.error("Error al obtener costo de estancia:", error);
     res.status(500).json(`Error: ${error}`);
   }
 };

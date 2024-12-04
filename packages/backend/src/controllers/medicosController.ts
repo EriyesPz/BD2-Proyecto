@@ -1,5 +1,10 @@
 import { Request, Response } from "express";
-import { obtenerMedicos, insertarMedico } from "../database/medicos";
+import {
+  obtenerMedicos,
+  insertarMedico,
+  obtenerResumenMedicosConsultas,
+  obtenerHonorariosMedicos,
+} from "../database/medicos";
 
 export const ctlObtenerMedicos = async (
   req: Request,
@@ -44,6 +49,47 @@ export const ctlInsertarMedico = async (
     res.status(201).json({ mensaje: "Médico insertado correctamente" });
   } catch (error) {
     console.error("Error al insertar médico:", error);
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
+export const ctlObtenerResumenMedicosConsultas = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const resumen = await obtenerResumenMedicosConsultas();
+    res.status(200).json(resumen);
+  } catch (error) {
+    console.error("Error al obtener resumen de médicos y consultas:", error);
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
+export const ctlObtenerHonorariosMedicos = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { fechaInicio, fechaFin } = req.query;
+
+    if (!fechaInicio || !fechaFin) {
+      res
+        .status(400)
+        .json({
+          mensaje:
+            "Debe proporcionar 'fechaInicio' y 'fechaFin' en los parámetros de consulta.",
+        });
+      return;
+    }
+
+    const honorarios = await obtenerHonorariosMedicos(
+      fechaInicio as string,
+      fechaFin as string
+    );
+    res.status(200).json(honorarios);
+  } catch (error) {
+    console.error("Error al obtener honorarios de médicos:", error);
     res.status(500).json(`Error: ${error}`);
   }
 };

@@ -4,6 +4,7 @@ import {
   insertarFactura,
   insertarPago,
   generarFacturaHospitalizacion,
+  obtenerTotalPagado,
 } from "../database/facturas";
 
 export const ctlObtenerFacturas = async (
@@ -64,6 +65,31 @@ export const ctlGenerarFacturaHospitalizacion = async (
     res.status(201).json({ mensaje: "Factura generada correctamente" });
   } catch (error) {
     console.error("Error al generar factura de hospitalización:", error);
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
+export const ctlObtenerTotalPagado = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { facturaID } = req.params;
+
+    if (!facturaID) {
+      res
+        .status(400)
+        .json({
+          mensaje:
+            "Debe proporcionar 'facturaID' en los parámetros de la ruta.",
+        });
+      return;
+    }
+
+    const totalPagado = await obtenerTotalPagado(parseInt(facturaID));
+    res.status(200).json({ totalPagado });
+  } catch (error) {
+    console.error("Error al obtener total pagado de la factura:", error);
     res.status(500).json(`Error: ${error}`);
   }
 };

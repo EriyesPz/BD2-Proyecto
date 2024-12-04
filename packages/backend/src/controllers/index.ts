@@ -7,6 +7,7 @@ export {
   ctlInsertarFactura,
   ctlInsertarPago,
   ctlObtenerFacturas,
+  ctlObtenerTotalPagado
 } from "./facturaController";
 export { ctlInsertarUsuario, ctlUsuarios } from "./controllerUsuarios";
 export {
@@ -34,15 +35,20 @@ export {
   ctlDarAltaHospitalizacion,
   ctlObtenerHospitalizaciones,
   ctlRegistrarHospitalizacion,
+  ctlObtenerCostoEstancia
 } from "./hospitalizacionesController";
 export {
   ctlInsertarMedicamento,
   ctlObtenerMedicamentos,
+  ctlObtenerStockMedicamentos,
+  ctlVerificarStockMedicamento
 } from "./medicamentosController";
-export { ctlInsertarMedico, ctlObtenerMedicos } from "./medicosController";
+export { ctlInsertarMedico, ctlObtenerMedicos, ctlObtenerHonorariosMedicos,  ctlObtenerResumenMedicosConsultas } from "./medicosController";
 export {
   ctlInsertarPaciente,
   ctlObtenerPacientes,
+  ctlCalcularEdadPaciente,
+  ctlObtenerResumenPacientesHospitalizaciones
 } from "./pacientesController";
 export {
   ctlInsertarPacienteSeguro,
@@ -56,6 +62,7 @@ export { ctlInsertarPuesto, ctlObtenerPuestos } from "./puestosController";
 export {
   ctlInsertarResultadoLaboratorio,
   ctlObtenerResultadosLaboratorio,
+  ctlObtenerResultadosLaboratorioPorID
 } from "./resultadoLaboratorioController";
 export {
   ctlInsertarSeguroMedico,

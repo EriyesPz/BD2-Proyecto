@@ -23,7 +23,8 @@ export const registrarHospitalizacion = async (
 ) => {
   try {
     const pool = await dbConexion();
-    await pool.request()
+    await pool
+      .request()
       .input("PacienteID", sql.Int, pacienteID)
       .input("HabitacionID", sql.Int, habitacionID)
       .input("FechaIngreso", sql.DateTime2, fechaIngreso)
@@ -41,7 +42,8 @@ export const darAltaHospitalizacion = async (
 ) => {
   try {
     const pool = await dbConexion();
-    await pool.request()
+    await pool
+      .request()
       .input("HospitalizacionID", sql.Int, hospitalizacionID)
       .input("FechaAlta", sql.DateTime2, fechaAlta)
       .execute("Hospitalizacion.sp_DarAltaHospitalizacion");
@@ -50,3 +52,20 @@ export const darAltaHospitalizacion = async (
     throw new Error(`Error al dar de alta hospitalización: ${error}`);
   }
 };
+
+export const obtenerCostoEstancia = async (hospitalizacionID: number) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT Hospitalizacion.fn_CostoEstancia(@HospitalizacionID) AS CostoEstancia;
+    `;
+    const resultado = await pool
+      .request()
+      .input("HospitalizacionID", sql.Int, hospitalizacionID)
+      .query(consulta);
+    return resultado.recordset[0].CostoEstancia;
+  } catch (error) {
+    throw new Error(`Error al obtener costo de estancia: ${error}`);
+  }
+};
+

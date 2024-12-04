@@ -41,3 +41,21 @@ export const insertarResultadoLaboratorio = async (
     throw new Error(`Error al insertar resultado de laboratorio: ${error}`);
   }
 };
+
+export const obtenerResultadosLaboratorioPorID = async (
+  resultadoID: number
+) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT Laboratorio.fn_ObtenerResultados(@ResultadoID) AS Resultados;
+    `;
+    const resultado = await pool
+      .request()
+      .input("ResultadoID", sql.Int, resultadoID)
+      .query(consulta);
+    return resultado.recordset[0].Resultados;
+  } catch (error) {
+    throw new Error(`Error al obtener resultados de laboratorio: ${error}`);
+  }
+};
