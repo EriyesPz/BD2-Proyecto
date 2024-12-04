@@ -11,9 +11,13 @@ export const ctlObtenerConsultasMedicas = async (
   try {
     const consultas = await obtenerConsultasMedicas();
     res.status(200).json(consultas);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error al obtener consultas médicas:", error);
-    res.status(500).json(`Error: ${error}`);
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Error desconocido" });
+    }
   }
 };
 
@@ -30,6 +34,7 @@ export const ctlInsertarConsultaMedica = async (
       diagnostico,
       prescripcion,
     } = req.body;
+
     await insertarConsultaMedica(
       pacienteID,
       medicoID,
@@ -38,11 +43,17 @@ export const ctlInsertarConsultaMedica = async (
       diagnostico,
       prescripcion
     );
+
     res
       .status(201)
       .json({ mensaje: "Consulta médica insertada correctamente" });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error al insertar consulta médica:", error);
-    res.status(500).json(`Error: ${error}`);
+
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Error desconocido" });
+    }
   }
 };
