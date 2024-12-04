@@ -9,7 +9,7 @@ import {
   Summary,
 } from "./styled";
 import { Table, Button, InputText, Select } from "../../../components/ui";
-import { getFacturaPorID, getFacturas } from "../../../lib/api";
+import { getFacturaPorID, getFacturas, insertarPago } from "../../../lib/api";
 
 export const Factura = () => {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -20,11 +20,16 @@ export const Factura = () => {
   const [loadingFacturas, setLoadingFacturas] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [pago, setPago] = useState({
+    montoPagado: 0,
+    metodoPago: "",
+  });
+
   useEffect(() => {
     const fetchFacturas = async () => {
       try {
         const data = await getFacturas();
-        console.log("Facturas recibidas:", data);
         setFacturas(data);
       } catch (err) {
         console.error("Error al cargar la lista de facturas:", err);
@@ -58,6 +63,25 @@ export const Factura = () => {
     fetchFactura();
   }, [selectedPaciente, searchValue]);
 
+  const handleSubmitPago = async () => {
+    try {
+      if (factura) {
+        await insertarPago({
+          facturaID: factura.FacturaID,
+          fechaPago: new Date().toISOString(),
+          montoPagado: pago.montoPagado,
+          metodoPago: pago.metodoPago,
+        });
+        alert("Pago registrado correctamente.");
+        setShowPaymentForm(false);
+        setPago({ montoPagado: 0, metodoPago: "" });
+      }
+    } catch (error) {
+      console.error("Error al registrar el pago:", error);
+      alert("Hubo un error al registrar el pago.");
+    }
+  };
+
   const servicios = factura
     ? [
         {
@@ -88,9 +112,6 @@ export const Factura = () => {
   const total = subtotal + impuestos;
   const totalPagado = factura?.TotalFactura || 0;
   const saldoPendiente = total - totalPagado;
-
-  const handlePrint = () => console.log("Imprimiendo factura...");
-  const handlePay = () => console.log("Procesando pago...");
 
   return (
     <Container>
@@ -189,14 +210,38 @@ export const Factura = () => {
             </Summary>
           </Section>
           <ButtonGroup>
-            <Button onClick={handlePrint}>Imprimir Factura</Button>
-            {saldoPendiente > 0 && (
-              <Button onClick={handlePay}>Registrar Pago</Button>
-            )}
+            <Button onClick={() => setShowPaymentForm(true)}>
+              Registrar Pago
+            </Button>
           </ButtonGroup>
         </>
       ) : (
         <Section>No hay datos para mostrar.</Section>
+      )}
+      {showPaymentForm && (
+        <Section>
+          <SubHeader>Registrar Pago</SubHeader>
+          <InputText
+            placeholder="Monto a pagar"
+            value={pago.montoPagado}
+            onChange={(e) =>
+              setPago({ ...pago, montoPagado: parseFloat(e.target.value) || 0 })
+            }
+          />
+          <Select
+            options={[
+              { value: "Efectivo", label: "Efectivo" },
+              { value: "Tarjeta", label: "Tarjeta" },
+              { value: "Transferencia", label: "Transferencia" },
+            ]}
+            placeholder="Seleccione método de pago"
+            onChange={(value) => setPago({ ...pago, metodoPago: value })}
+          />
+          <ButtonGroup>
+            <Button onClick={handleSubmitPago}>Confirmar</Button>
+            <Button onClick={() => setShowPaymentForm(false)}>Cancelar</Button>
+          </ButtonGroup>
+        </Section>
       )}
     </Container>
   );
