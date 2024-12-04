@@ -1,205 +1,253 @@
 import React, { useState } from "react";
 import { Label, InputText, Button, Select } from "../../../components/ui";
-import styled from "styled-components";
+import { ButtonGroup, Container, FieldGroup, Form, Header } from "./styled";
+import { insertarMedico } from "../../../lib/api"; // Importar la función de la API para insertar médicos
 
-const specialties = [
-  { value: "Cardiology", label: "Cardiology" },
-  { value: "Dermatology", label: "Dermatology" },
-  { value: "Neurology", label: "Neurology" },
-  { value: "Pediatrics", label: "Pediatrics" },
-  { value: "Orthopedics", label: "Orthopedics" },
-  { value: "General Medicine", label: "General Medicine" },
+const especialidades = [
+  { value: 1, label: "Cardiología" },
+  { value: 2, label: "Dermatología" },
+  { value: 3, label: "Neurología" },
+  { value: 4, label: "Pediatría" },
+  { value: 5, label: "Ortopedia" },
+  { value: 6, label: "Medicina General" },
 ];
 
-const Container = styled.div`
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Header = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const FieldGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-`;
-
-export const RegistarDoctor = () => {
+export const RegistrarDoctor = () => {
   const [formValues, setFormValues] = useState({
-    firstName: "",
-    lastName: "",
-    specialty: "",
-    type: "",
-    consultationFee: "",
-    surgeryFee: "",
-    phone: "",
+    nombre: "",
+    apellido: "",
+    especialidad: "",
+    tipo: "",
+    honorariosConsulta: "",
+    honorariosCirugia: "",
+    telefono: "",
     email: "",
-    address: {
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
+    direccion: {
+      calle: "",
+      ciudad: "",
+      estado: "",
+      codigoPostal: "",
     },
   });
+  const [cargando, setCargando] = useState(false); // Manejar el estado de carga
+  const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
-  const handleChange = (field: string, value: string) => {
-    if (field.includes("address.")) {
-      const addressField = field.split(".")[1];
+  const handleChange = (campo: string, valor: string) => {
+    if (campo.includes("direccion.")) {
+      const campoDireccion = campo.split(".")[1];
       setFormValues((prev) => ({
         ...prev,
-        address: {
-          ...prev.address,
-          [addressField]: value,
+        direccion: {
+          ...prev.direccion,
+          [campoDireccion]: valor,
         },
       }));
     } else {
       setFormValues((prev) => ({
         ...prev,
-        [field]: value,
+        [campo]: valor,
       }));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Doctor registered:", formValues);
+
+    const {
+      nombre,
+      apellido,
+      especialidad,
+      tipo,
+      honorariosConsulta,
+      honorariosCirugia,
+      telefono,
+      email,
+      direccion,
+    } = formValues;
+
+    // Validaciones simples
+    if (
+      !nombre ||
+      !apellido ||
+      !especialidad ||
+      !tipo ||
+      !honorariosConsulta ||
+      !telefono ||
+      !email
+    ) {
+      alert("Por favor, complete todos los campos requeridos.");
+      return;
+    }
+
+    setCargando(true);
+    setMensajeExito(null);
+
+    try {
+      // Preparar datos para el envío
+      await insertarMedico({
+        nombre,
+        apellido,
+        especialidadID: Number(especialidad),
+        interno: tipo === "internal",
+        honorariosConsulta: parseFloat(honorariosConsulta),
+        honorariosCirugia: parseFloat(honorariosCirugia),
+        direccionID: 1, // Supongamos que es una dirección genérica (puedes reemplazarlo por un ID dinámico)
+        telefono,
+        email,
+      });
+
+      setMensajeExito("¡Doctor registrado exitosamente!");
+      setFormValues({
+        nombre: "",
+        apellido: "",
+        especialidad: "",
+        tipo: "",
+        honorariosConsulta: "",
+        honorariosCirugia: "",
+        telefono: "",
+        email: "",
+        direccion: {
+          calle: "",
+          ciudad: "",
+          estado: "",
+          codigoPostal: "",
+        },
+      });
+    } catch (error) {
+      console.error("Error al registrar al doctor:", error);
+      alert("Ocurrió un error al registrar al doctor.");
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
     <Container>
-      <Header>Register New Doctor</Header>
+      <Header>Registrar Nuevo Doctor</Header>
+      {mensajeExito && <p style={{ color: "green" }}>{mensajeExito}</p>}
       <Form onSubmit={handleSubmit}>
         {/* Nombres */}
         <FieldGroup>
-          <Label>First Name</Label>
+          <Label>Nombre</Label>
           <InputText
-            placeholder="Enter first name"
-            value={formValues.firstName}
-            onChange={(e) => handleChange("firstName", e.target.value)}
+            placeholder="Ingrese el nombre"
+            value={formValues.nombre}
+            onChange={(e) => handleChange("nombre", e.target.value)}
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>Last Name</Label>
+          <Label>Apellido</Label>
           <InputText
-            placeholder="Enter last name"
-            value={formValues.lastName}
-            onChange={(e) => handleChange("lastName", e.target.value)}
+            placeholder="Ingrese el apellido"
+            value={formValues.apellido}
+            onChange={(e) => handleChange("apellido", e.target.value)}
           />
         </FieldGroup>
 
         {/* Especialidad y Tipo */}
         <FieldGroup>
-          <Label>Specialty</Label>
+          <Label>Especialidad</Label>
           <Select
-            options={specialties}
-            onChange={(value) => handleChange("specialty", value)}
-            placeholder="Select a specialty"
+            options={especialidades}
+            onChange={(value) => handleChange("especialidad", value)}
+            placeholder="Seleccione una especialidad"
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>Type</Label>
+          <Label>Tipo</Label>
           <Select
             options={[
-              { value: "internal", label: "Internal" },
-              { value: "external", label: "External" },
+              { value: "internal", label: "Interno" },
+              { value: "external", label: "Externo" },
             ]}
-            onChange={(value) => handleChange("type", value)}
-            placeholder="Select type"
+            onChange={(value) => handleChange("tipo", value)}
+            placeholder="Seleccione el tipo"
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>Consultation Fee</Label>
+          <Label>Honorarios por Consulta</Label>
           <InputText
             type="number"
-            placeholder="Enter consultation fee"
-            value={formValues.consultationFee}
-            onChange={(e) => handleChange("consultationFee", e.target.value)}
+            placeholder="Ingrese los honorarios por consulta"
+            value={formValues.honorariosConsulta}
+            onChange={(e) =>
+              handleChange("honorariosConsulta", e.target.value)
+            }
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>Surgery Fee</Label>
+          <Label>Honorarios por Cirugía</Label>
           <InputText
             type="number"
-            placeholder="Enter surgery fee"
-            value={formValues.surgeryFee}
-            onChange={(e) => handleChange("surgeryFee", e.target.value)}
+            placeholder="Ingrese los honorarios por cirugía"
+            value={formValues.honorariosCirugia}
+            onChange={(e) =>
+              handleChange("honorariosCirugia", e.target.value)
+            }
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>Phone</Label>
+          <Label>Teléfono</Label>
           <InputText
             type="tel"
-            placeholder="Enter phone number"
-            value={formValues.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
+            placeholder="Ingrese el número de teléfono"
+            value={formValues.telefono}
+            onChange={(e) => handleChange("telefono", e.target.value)}
           />
         </FieldGroup>
         <FieldGroup>
           <Label>Email</Label>
           <InputText
             type="email"
-            placeholder="Enter email address"
+            placeholder="Ingrese el correo electrónico"
             value={formValues.email}
             onChange={(e) => handleChange("email", e.target.value)}
           />
         </FieldGroup>
+        {/* Dirección */}
         <FieldGroup>
-          <Label>Street Address</Label>
+          <Label>Calle</Label>
           <InputText
-            placeholder="Enter street address"
-            value={formValues.address.street}
-            onChange={(e) => handleChange("address.street", e.target.value)}
+            placeholder="Ingrese la calle"
+            value={formValues.direccion.calle}
+            onChange={(e) => handleChange("direccion.calle", e.target.value)}
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>City</Label>
+          <Label>Ciudad</Label>
           <InputText
-            placeholder="Enter city"
-            value={formValues.address.city}
-            onChange={(e) => handleChange("address.city", e.target.value)}
+            placeholder="Ingrese la ciudad"
+            value={formValues.direccion.ciudad}
+            onChange={(e) => handleChange("direccion.ciudad", e.target.value)}
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>State</Label>
+          <Label>Estado</Label>
           <InputText
-            placeholder="Enter state"
-            value={formValues.address.state}
-            onChange={(e) => handleChange("address.state", e.target.value)}
+            placeholder="Ingrese el estado"
+            value={formValues.direccion.estado}
+            onChange={(e) => handleChange("direccion.estado", e.target.value)}
           />
         </FieldGroup>
         <FieldGroup>
-          <Label>ZIP Code</Label>
+          <Label>Código Postal</Label>
           <InputText
-            placeholder="Enter ZIP code"
-            value={formValues.address.zipCode}
-            onChange={(e) => handleChange("address.zipCode", e.target.value)}
+            placeholder="Ingrese el código postal"
+            value={formValues.direccion.codigoPostal}
+            onChange={(e) =>
+              handleChange("direccion.codigoPostal", e.target.value)
+            }
           />
         </FieldGroup>
         <ButtonGroup>
-          <Button type="button" onClick={() => console.log("Cancelled")}>
-            Cancel
+          <Button type="button" onClick={() => console.log("Cancelado")}>
+            Cancelar
           </Button>
-          <Button type="submit">Save</Button>
+          <Button type="submit" disabled={cargando}>
+            {cargando ? "Guardando..." : "Guardar"}
+          </Button>
         </ButtonGroup>
       </Form>
     </Container>
   );
-}
+};

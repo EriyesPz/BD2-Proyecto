@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Button, InputText, Label, Select } from "../../../components/ui";
+import { Table, InputText, Label, Select } from "../../../components/ui";
 import { getPacientes, getPacientePorID } from "../../../lib/api";
 import {
   Container,
@@ -120,8 +120,6 @@ export const PerfilPaciente = () => {
               )}
             </div>
           </Card>
-
-          {/* Historial Médico */}
           <Card>
             <CardHeader>
               <CardTitle>Historial Médico</CardTitle>

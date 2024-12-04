@@ -6,7 +6,18 @@ export const obtenerHospitalizaciones = async () => {
   try {
     const pool = await dbConexion();
     const consulta = `
-      SELECT * FROM Hospitalizacion.Hospitalizaciones;
+      SELECT 
+        h.HospitalizacionID,
+        h.PacienteID,
+        CONCAT(p.Nombre, ' ', p.Apellido) AS NombrePaciente,
+        h.FechaIngreso,
+        h.FechaAlta,
+        h.HabitacionID,
+        h.Diagnostico,
+        h.Estado
+      FROM Hospitalizacion.Hospitalizaciones AS h
+      INNER JOIN Paciente.Pacientes AS p
+        ON h.PacienteID = p.PacienteID;
     `;
     const resultado = await pool.request().query(consulta);
     return resultado.recordset;
@@ -14,6 +25,7 @@ export const obtenerHospitalizaciones = async () => {
     throw new Error(`Error al obtener hospitalizaciones: ${error}`);
   }
 };
+
 
 export const registrarHospitalizacion = async (
   pacienteID: number,

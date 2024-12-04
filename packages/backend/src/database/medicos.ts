@@ -5,12 +5,79 @@ export const obtenerMedicos = async () => {
   try {
     const pool = await dbConexion();
     const consulta = `
-      SELECT * FROM Medico.Medicos;
+      SELECT 
+        m.MedicoID,
+        m.Nombre,
+        m.Apellido,
+        m.EspecialidadID,
+        e.NombreEspecialidad,
+        e.Descripcion AS DescripcionEspecialidad,
+        m.Interno,
+        m.HonorariosConsulta,
+        m.HonorariosCirugia,
+        m.DireccionID,
+        d.Calle,
+        d.Ciudad,
+        d.Estado,
+        d.CodigoPostal,
+        d.Pais,
+        m.Telefono,
+        m.Email,
+        m.FechaRegistro
+      FROM Medico.Medicos AS m
+      INNER JOIN Medico.Especialidades AS e
+        ON m.EspecialidadID = e.EspecialidadID
+      LEFT JOIN dbo.Direcciones AS d
+        ON m.DireccionID = d.DireccionID;
     `;
     const resultado = await pool.request().query(consulta);
     return resultado.recordset;
   } catch (error) {
     throw new Error(`Error al obtener médicos: ${error}`);
+  }
+};
+
+export const obtenerMedicoPorID = async (medicoID: number) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT 
+        m.MedicoID,
+        m.Nombre,
+        m.Apellido,
+        m.EspecialidadID,
+        e.NombreEspecialidad,
+        e.Descripcion AS DescripcionEspecialidad,
+        m.Interno,
+        m.HonorariosConsulta,
+        m.HonorariosCirugia,
+        m.DireccionID,
+        d.Calle,
+        d.Ciudad,
+        d.Estado,
+        d.CodigoPostal,
+        d.Pais,
+        m.Telefono,
+        m.Email,
+        m.FechaRegistro
+      FROM Medico.Medicos AS m
+      INNER JOIN Medico.Especialidades AS e
+        ON m.EspecialidadID = e.EspecialidadID
+      LEFT JOIN dbo.Direcciones AS d
+        ON m.DireccionID = d.DireccionID
+      WHERE m.MedicoID = @MedicoID;
+    `;
+    const resultado = await pool.request()
+      .input("MedicoID", sql.Int, medicoID)
+      .query(consulta);
+    
+    if (resultado.recordset.length === 0) {
+      throw new Error(`No se encontró un médico con el ID ${medicoID}`);
+    }
+
+    return resultado.recordset[0];
+  } catch (error) {
+    throw new Error(`Error al obtener médico por ID: ${error}`);
   }
 };
 

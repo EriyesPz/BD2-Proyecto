@@ -50,7 +50,8 @@ import {
   ctlObtenerStockMedicamentos,
   ctlObtenerTotalPagado,
   ctlVerificarStockMedicamento,
-  ctlObtenerPacientePorID
+  ctlObtenerPacientePorID,
+  ctlObtenerMedicoPorID
 } from "./controllers";
 
 const router = Router();
@@ -83,6 +84,7 @@ router.post("/examen", ctlInsertarExamen);
 
 router.get("/medicos", ctlObtenerMedicos);
 router.post("/medico", ctlInsertarMedico);
+router.get("/medico/:id", ctlObtenerMedicoPorID);
 
 router.get("/pacientes", ctlObtenerPacientes);
 router.post("/paciente", ctlInsertarPaciente);

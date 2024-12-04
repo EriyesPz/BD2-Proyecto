@@ -1,5 +1,18 @@
-import styled from "styled-components";
-import { Button, Label, Chart } from "../../../components/ui";
+import React, { useEffect, useState } from "react";
+import { Button, Label, Chart, Select } from "../../../components/ui";
+import {
+  Avatar,
+  AvatarContainer,
+  Calendar,
+  Card,
+  CardHeader,
+  Container,
+  Grid,
+  Header,
+  HighlightText,
+  Text,
+} from "./styled";
+import { getMedicos, getMedicoPorID } from "../../../lib/api";
 
 const chartData = [
   { month: "Ene", consultas: 65 },
@@ -10,153 +23,137 @@ const chartData = [
   { month: "Jun", consultas: 55 },
 ];
 
-const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`;
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-`;
-
-const Card = styled.div`
-  background: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-`;
-
-const CardHeader = styled.div`
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 12px;
-`;
-
-const AvatarContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const Avatar = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #ddd;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #555;
-`;
-
-const Text = styled.p`
-  margin: 0;
-  font-size: 14px;
-  color: #777;
-`;
-
-const HighlightText = styled.p`
-  font-size: 16px;
-  font-weight: bold;
-  margin: 0;
-  color: #333;
-`;
-
-const Calendar = styled.div`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  height: 300px;
-  background-color: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 export const DoctorPerfil = () => {
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [selectedDoctorID, setSelectedDoctorID] = useState<number | null>(null);
+  const [doctor, setDoctor] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const data = await getMedicos();
+        setDoctors(
+          data.map((doctor: any) => ({
+            value: doctor.MedicoID,
+            label: `${doctor.Nombre} ${doctor.Apellido}`,
+          }))
+        );
+      } catch (error) {
+        console.error("Error al obtener la lista de médicos:", error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    const fetchDoctor = async (id: number) => {
+      setLoading(true);
+      try {
+        const data = await getMedicoPorID(id);
+        setDoctor(data);
+      } catch (error) {
+        console.error("Error al obtener la información del médico:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selectedDoctorID) {
+      fetchDoctor(selectedDoctorID);
+    }
+  }, [selectedDoctorID]);
+
   return (
     <Container>
       <Header>
-        <h1>Doctor Profile</h1>
-        <Button>New Appointment</Button>
+        <h1>Perfil del Doctor</h1>
+        <Select
+          options={doctors}
+          placeholder="Selecciona un médico"
+          onChange={(value) => setSelectedDoctorID(Number(value))}
+        />
       </Header>
-      <Grid>
-        <Card>
-          <CardHeader>Doctor Information</CardHeader>
-          <AvatarContainer>
-            <Avatar>JP</Avatar>
-            <div>
-              <HighlightText>Dr. Juan Pérez</HighlightText>
-              <Text>Email: juan.perez@hospital.com</Text>
-              <Text>Phone: +34 123 456 789</Text>
-            </div>
-          </AvatarContainer>
-        </Card>
-        <Card>
-          <CardHeader>Specialty & Fees</CardHeader>
-          <Text>Specialty: Cardiology</Text>
+      {loading && <Container>Cargando información del doctor...</Container>}
+      {!loading && doctor && (
+        <>
           <Grid>
-            <div>
-              <Text>Consultation Fee:</Text>
-              <HighlightText>$150</HighlightText>
-            </div>
-            <div>
-              <Text>Surgery Fee:</Text>
-              <HighlightText>$1,500</HighlightText>
-            </div>
+            <Card>
+              <CardHeader>Información del Doctor</CardHeader>
+              <AvatarContainer>
+                <Avatar>
+                  {doctor.Nombre[0]}
+                  {doctor.Apellido[0]}
+                </Avatar>
+                <div>
+                  <HighlightText>
+                    Dr. {doctor.Nombre} {doctor.Apellido}
+                  </HighlightText>
+                  <Text>Email: {doctor.Email}</Text>
+                  <Text>Teléfono: {doctor.Telefono}</Text>
+                </div>
+              </AvatarContainer>
+            </Card>
+            <Card>
+              <CardHeader>Especialidad y Honorarios</CardHeader>
+              <Text>Especialidad: {doctor.NombreEspecialidad}</Text>
+              <Grid>
+                <div>
+                  <Text>Honorarios Consulta:</Text>
+                  <HighlightText>${doctor.HonorariosConsulta}</HighlightText>
+                </div>
+                <div>
+                  <Text>Honorarios Cirugía:</Text>
+                  <HighlightText>
+                    {doctor.HonorariosCirugia
+                      ? `$${doctor.HonorariosCirugia}`
+                      : "No aplica"}
+                  </HighlightText>
+                </div>
+              </Grid>
+            </Card>
           </Grid>
-        </Card>
-      </Grid>
-      <Grid>
-        {/* Calendario */}
-        <Card>
-          <CardHeader>Appointments Calendar</CardHeader>
-          <Calendar>
-            <Label>Calendar Placeholder</Label>
-          </Calendar>
-          <div style={{ textAlign: "right", marginTop: "16px" }}>
-            <Button>New Appointment</Button>
-          </div>
-        </Card>
-        <Card>
-          <CardHeader>Statistics</CardHeader>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
-            <div>
-              <Text>Completed Consultations:</Text>
-              <HighlightText>396</HighlightText>
-            </div>
-            <div>
-              <Text>Total Fees:</Text>
-              <HighlightText>$59,400</HighlightText>
-            </div>
-          </div>
-          <Chart
-            data={chartData}
-            xKey="month"
-            yKey="consultas"
-            barColor="#0ea5e9"
-            title="Monthly Consultations"
-          />
-        </Card>
-      </Grid>
+          <Grid>
+            {/* Calendario */}
+            <Card>
+              <CardHeader>Calendario de Citas</CardHeader>
+              <Calendar>
+                <Label>Calendario Placeholder</Label>
+              </Calendar>
+              <div style={{ textAlign: "right", marginTop: "16px" }}>
+                <Button>Nueva Cita</Button>
+              </div>
+            </Card>
+            <Card>
+              <CardHeader>Estadísticas</CardHeader>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "16px",
+                }}
+              >
+                <div>
+                  <Text>Consultas Completadas:</Text>
+                  <HighlightText>396</HighlightText>
+                </div>
+                <div>
+                  <Text>Total Honorarios:</Text>
+                  <HighlightText>$59,400</HighlightText>
+                </div>
+              </div>
+              <Chart
+                data={chartData}
+                xKey="month"
+                yKey="consultas"
+                barColor="#0ea5e9"
+                title="Consultas Mensuales"
+              />
+            </Card>
+          </Grid>
+        </>
+      )}
     </Container>
   );
-}
+};

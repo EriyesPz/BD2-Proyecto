@@ -4,6 +4,7 @@ import {
   insertarMedico,
   obtenerResumenMedicosConsultas,
   obtenerHonorariosMedicos,
+  obtenerMedicoPorID,
 } from "../database/medicos";
 
 export const ctlObtenerMedicos = async (
@@ -16,6 +17,30 @@ export const ctlObtenerMedicos = async (
   } catch (error) {
     console.error("Error al obtener médicos:", error);
     res.status(500).json(`Error: ${error}`);
+  }
+};
+
+export const ctlObtenerMedicoPorID = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const medico = await obtenerMedicoPorID(Number(id));
+
+    if (!medico) {
+      res
+        .status(404)
+        .json({ mensaje: `No se encontró un médico con el ID ${id}` });
+      return;
+    }
+
+    res.status(200).json(medico);
+  } catch (error) {
+    console.error("Error al obtener médico por ID:", error);
+    res
+      .status(500)
+      .json({ mensaje: "Error al obtener médico por ID", error: error });
   }
 };
 
@@ -74,12 +99,10 @@ export const ctlObtenerHonorariosMedicos = async (
     const { fechaInicio, fechaFin } = req.query;
 
     if (!fechaInicio || !fechaFin) {
-      res
-        .status(400)
-        .json({
-          mensaje:
-            "Debe proporcionar 'fechaInicio' y 'fechaFin' en los parámetros de consulta.",
-        });
+      res.status(400).json({
+        mensaje:
+          "Debe proporcionar 'fechaInicio' y 'fechaFin' en los parámetros de consulta.",
+      });
       return;
     }
 

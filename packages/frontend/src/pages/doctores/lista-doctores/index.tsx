@@ -1,103 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, Select, InputText, Label } from "../../../components/ui";
-import styled from "styled-components";
-
-type DoctorType = "internal" | "external";
-type Specialty =
-  | "Cardiology"
-  | "Dermatology"
-  | "Neurology"
-  | "Pediatrics"
-  | "Orthopedics"
-  | "General Medicine";
+import { Container, Header, FiltersContainer, Filter } from "./styled";
+import { getMedicos } from "../../../lib/api";
 
 interface Doctor {
-  id: string;
+  id: number;
   fullName: string;
-  specialty: Specialty;
-  type: DoctorType;
+  specialty: string;
+  type: "internal" | "external";
   phone: string;
   email: string;
 }
 
-const doctors: Doctor[] = [
-  {
-    id: "1",
-    fullName: "Dr. John Smith",
-    specialty: "Cardiology",
-    type: "internal",
-    phone: "+1 (555) 123-4567",
-    email: "john.smith@hospital.com",
-  },
-  {
-    id: "2",
-    fullName: "Dr. Sarah Johnson",
-    specialty: "Pediatrics",
-    type: "external",
-    phone: "+1 (555) 234-5678",
-    email: "sarah.johnson@hospital.com",
-  },
-  {
-    id: "3",
-    fullName: "Dr. Michael Chen",
-    specialty: "Neurology",
-    type: "internal",
-    phone: "+1 (555) 345-6789",
-    email: "michael.chen@hospital.com",
-  },
+const COLUMNAS = [
+  { header: "Nombre Completo", accessorKey: "fullName" },
+  { header: "Especialidad", accessorKey: "specialty" },
+  { header: "Tipo", accessorKey: "type" },
+  { header: "Telefono", accessorKey: "phone" },
+  { header: "Email", accessorKey: "email" },
 ];
-
-// Columnas de la tabla
-const columnas = [
-  {
-    header: "Full Name",
-    accessorKey: "fullName",
-  },
-  {
-    header: "Specialty",
-    accessorKey: "specialty",
-  },
-  {
-    header: "Type",
-    accessorKey: "type",
-  },
-  {
-    header: "Phone",
-    accessorKey: "phone",
-  },
-  {
-    header: "Email",
-    accessorKey: "email",
-  },
-];
-
-const Container = styled.div`
-  padding: 20px;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Header = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const FiltersContainer = styled.div`
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-`;
-
-const Filter = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
 
 export const DoctorsPage = () => {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specialties, setSpecialties] = useState<string[]>([]);
   const [filterName, setFilterName] = useState<string>("");
   const [filterSpecialty, setFilterSpecialty] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const data = await getMedicos();
+
+        // Procesar los médicos obtenidos
+        const processedDoctors = data.map((medico: any) => ({
+          id: medico.MedicoID,
+          fullName: `${medico.Nombre} ${medico.Apellido}`,
+          specialty: medico.NombreEspecialidad || "Unknown",
+          type: medico.Interno ? "internal" : "external",
+          phone: medico.Telefono,
+          email: medico.Email,
+        }));
+
+        setDoctors(processedDoctors);
+
+        const uniqueSpecialties = Array.from(
+          new Set(processedDoctors.map((doctor: any) => doctor.specialty))
+        ).filter((specialty) => specialty !== "Unknown") as string[];
+
+        setSpecialties(uniqueSpecialties);
+      } catch (error) {
+        console.error("Error al obtener los médicos:", error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const filteredDoctors = doctors.filter((doctor) => {
     const matchesName =
@@ -126,8 +84,11 @@ export const DoctorsPage = () => {
           <Label>Especialidad</Label>
           <Select
             options={[
-                { value: "Cardiology", label: "Cardiology" },
-                { value: "Dermatology", label: "Dermatology" },
+              { value: "all", label: "All Specialties" },
+              ...specialties.map((specialty) => ({
+                value: specialty,
+                label: specialty,
+              })),
             ]}
             onChange={(value) => setFilterSpecialty(value)}
           />
@@ -145,7 +106,7 @@ export const DoctorsPage = () => {
         </Filter>
       </FiltersContainer>
 
-      <Table columnas={columnas} datos={filteredDoctors} />
+      <Table columnas={COLUMNAS} datos={filteredDoctors} />
     </Container>
   );
-}
+};

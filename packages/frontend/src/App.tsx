@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout/sidebar";
 import { LoginForm } from "../src/pages/login";
 import { Pacientes, PerfilPaciente, RegistroPaciente } from "./pages/paciente";
-import { DoctorsPage, RegistarDoctor, DoctorPerfil } from "./pages/doctores";
+import { DoctorsPage, RegistrarDoctor, DoctorPerfil } from "./pages/doctores";
 import {
   Hospitalizacion,
   HospitalizationDetalle,
@@ -34,7 +34,7 @@ export const App: React.FC = () => {
 
           {/* Doctores */}
           <Route path="/doctores" element={<DoctorsPage />} />
-          <Route path="/registrar-doctor" element={<RegistarDoctor />} />
+          <Route path="/registrar-doctor" element={<RegistrarDoctor />} />
           <Route path="/doctor" element={<DoctorPerfil />} />
 
           {/* Hospitalización */}

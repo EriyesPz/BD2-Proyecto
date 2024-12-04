@@ -1,78 +1,26 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import { Button, InputDate, InputText, Label, Select, Table } from "../../../components/ui";
-import { format, differenceInDays } from "date-fns";
+import { useState, useEffect } from "react";
+import {
+  Badge,
+  Container,
+  FilterContainer,
+  Header,
+  TableActions,
+} from "./styled";
+import {
+  Button,
+  InputDate,
+  InputText,
+  Label,
+  Select,
+  Table,
+} from "../../../components/ui";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { getHospitalizaciones } from "../../../lib/api";
 
-// Datos de ejemplo
-const hospitalizaciones = [
-  {
-    id: 1,
-    paciente: "María García",
-    habitacion: "201",
-    tipoHabitacion: "Individual",
-    fechaIngreso: new Date(2024, 0, 15),
-    estado: "activa",
-  },
-  {
-    id: 2,
-    paciente: "Juan Pérez",
-    habitacion: "302",
-    tipoHabitacion: "Doble",
-    fechaIngreso: new Date(2024, 0, 10),
-    estado: "alta",
-  },
-  {
-    id: 3,
-    paciente: "Ana Martínez",
-    habitacion: "105",
-    tipoHabitacion: "Individual",
-    fechaIngreso: new Date(2024, 0, 20),
-    estado: "activa",
-  },
-];
-
-// Estilización con styled-components
-const Container = styled.div`
-  padding: 20px;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`;
-
-const FilterContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Badge = styled.span<{ color: string }>`
-  background-color: ${(props) => props.color};
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-`;
-
-const TableActions = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-
-// Función para determinar el color del estado
 const getEstadoBadge = (estado: string) => {
-  switch (estado) {
-    case "activa":
+  switch (estado.toLowerCase()) {
+    case "activo":
       return <Badge color="#4caf50">Activa</Badge>;
     case "alta":
       return <Badge color="#2196f3">Alta</Badge>;
@@ -84,11 +32,60 @@ const getEstadoBadge = (estado: string) => {
 };
 
 export const Hospitalizacion = () => {
+  const [hospitalizaciones, setHospitalizaciones] = useState<any[]>([]);
+  const [filteredHospitalizaciones, setFilteredHospitalizaciones] =
+    useState<any[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [estado, setEstado] = useState("todas");
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-  const [seleccionados, setSeleccionados] = useState<number[]>([]);
+  const [fechaInicio, setFechaInicio] = useState<string>(""); 
+  const [fechaFin, setFechaFin] = useState<string>("");
+  
+
+  useEffect(() => {
+    const fetchHospitalizaciones = async () => {
+      try {
+        const data = await getHospitalizaciones();
+        setHospitalizaciones(data);
+        setFilteredHospitalizaciones(data); // Inicialmente muestra todos
+      } catch (error) {
+        console.error("Error al cargar hospitalizaciones:", error);
+      }
+    };
+
+    fetchHospitalizaciones();
+  }, []);
+
+  useEffect(() => {
+    let resultados = hospitalizaciones;
+
+    // Filtrar por búsqueda de paciente
+    if (busqueda) {
+      resultados = resultados.filter((h) =>
+        h.PacienteID.toString().includes(busqueda)
+      );
+    }
+
+    // Filtrar por estado
+    if (estado !== "todas") {
+      resultados = resultados.filter((h) =>
+        h.Estado.toLowerCase() === estado.toLowerCase()
+      );
+    }
+
+    // Filtrar por rango de fechas
+    if (fechaInicio) {
+      resultados = resultados.filter(
+        (h) => new Date(h.FechaIngreso) >= new Date(fechaInicio)
+      );
+    }
+    if (fechaFin) {
+      resultados = resultados.filter(
+        (h) => new Date(h.FechaIngreso) <= new Date(fechaFin)
+      );
+    }
+
+    setFilteredHospitalizaciones(resultados);
+  }, [busqueda, estado, fechaInicio, fechaFin, hospitalizaciones]);
 
   return (
     <Container>
@@ -100,7 +97,7 @@ export const Hospitalizacion = () => {
         <div>
           <Label>Búsqueda</Label>
           <InputText
-            placeholder="Buscar paciente..."
+            placeholder="Buscar por paciente ID..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
           />
@@ -110,7 +107,7 @@ export const Hospitalizacion = () => {
           <Select
             options={[
               { value: "todas", label: "Todas" },
-              { value: "activas", label: "Activas" },
+              { value: "activo", label: "Activas" },
               { value: "alta", label: "Alta" },
               { value: "cancelado", label: "Cancelado" },
             ]}
@@ -120,44 +117,28 @@ export const Hospitalizacion = () => {
         </div>
         <div>
           <Label>Fecha Inicio</Label>
-          <InputDate
-            value={fechaInicio}
-            onChange={(date) => setFechaInicio(date)}
-          />
+          <InputDate value={fechaInicio} onChange={(date) => setFechaInicio(date)} />
         </div>
         <div>
           <Label>Fecha Fin</Label>
-          <InputDate
-            value={fechaFin}
-            onChange={(date) => setFechaFin(date)}
-          />
+          <InputDate value={fechaFin} onChange={(date) => setFechaFin(date)} />
         </div>
       </FilterContainer>
       <Table
         columnas={[
-          { header: "Paciente", accessorKey: "paciente" },
-          { header: "Habitación", accessorKey: "habitacion" },
-          { header: "Tipo", accessorKey: "tipoHabitacion" },
-          { header: "Fecha de Ingreso", accessorKey: "fechaIngreso" },
-          { header: "Días", accessorKey: "dias" },
-          { header: "Estado", accessorKey: "estado" },
-          { header: "Acciones", accessorKey: "acciones" },
+          { header: "Paciente", accessorKey: "NombrePaciente" },
+          { header: "Habitación", accessorKey: "HabitacionID" },
+          { header: "Fecha de Ingreso", accessorKey: "FechaIngreso" },
+          { header: "Estado", accessorKey: "Estado" },
         ]}
         datos={hospitalizaciones.map((h) => ({
-          paciente: h.paciente,
-          habitacion: h.habitacion,
-          tipoHabitacion: h.tipoHabitacion,
-          fechaIngreso: format(h.fechaIngreso, "dd/MM/yyyy", { locale: es }),
-          dias: differenceInDays(new Date(), h.fechaIngreso),
-          estado: getEstadoBadge(h.estado),
-          acciones: (
-            <TableActions>
-              <Button>Ver</Button>
-              {h.estado === "activa" && <Button>Dar Alta</Button>}
-            </TableActions>
-          ),
+          NombrePaciente: h.NombrePaciente,
+          HabitacionID: h.HabitacionID,
+          FechaIngreso: format(parseISO(h.FechaIngreso), "dd/MM/yyyy", { locale: es }),
+          Estado: h.Estado
         }))}
       />
+
     </Container>
   );
-}
+};

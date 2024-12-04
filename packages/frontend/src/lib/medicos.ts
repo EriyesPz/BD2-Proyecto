@@ -9,6 +9,15 @@ export const getMedicos = async () => {
   }
 };
 
+export const getMedicoPorID = async (id: number) => {
+  try {
+    const response = await cliente.get(`/medico/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error al obtener médico con ID ${id}: ${error.message}`);
+  }
+};
+
 export const insertarMedico = async (medico: {
   nombre: string;
   apellido: string;

@@ -43,7 +43,7 @@ export {
   ctlObtenerStockMedicamentos,
   ctlVerificarStockMedicamento
 } from "./medicamentosController";
-export { ctlInsertarMedico, ctlObtenerMedicos, ctlObtenerHonorariosMedicos,  ctlObtenerResumenMedicosConsultas } from "./medicosController";
+export { ctlInsertarMedico, ctlObtenerMedicos, ctlObtenerHonorariosMedicos,  ctlObtenerResumenMedicosConsultas, ctlObtenerMedicoPorID } from "./medicosController";
 export {
   ctlInsertarPaciente,
   ctlObtenerPacientes,
