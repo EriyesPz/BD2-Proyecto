@@ -1,39 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import styled from "styled-components";
-import { Button, InputText, Select, Label } from "../../../components/ui";
-
-const proveedores = [
-  { id: "1", nombre: "Proveedor A" },
-  { id: "2", nombre: "Proveedor B" },
-  { id: "3", nombre: "Proveedor C" },
-];
-
-const Container = styled.div`
-  max-width: 600px;
-  margin: 20px auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  font-family: "Roboto", sans-serif;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 20px;
-`;
-
-const ActionGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-`;
+import { ActionGroup, Container, FormGroup, Title } from "./styled";
+import { Button, InputText, Label } from "../../../components/ui";
+import { insertarMedicamento } from "../../../lib/api";
 
 export const RegistroMedicamento = () => {
   const [nombre, setNombre] = useState("");
@@ -43,21 +12,44 @@ export const RegistroMedicamento = () => {
   const [proveedor, setProveedor] = useState("");
   const [nuevoProveedor, setNuevoProveedor] = useState("");
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [proveedores, setProveedores] = useState<any[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Medicamento guardado:", { nombre, descripcion, precio, stock, proveedor });
-    alert("El medicamento ha sido guardado exitosamente.");
+    try {
+      await insertarMedicamento({
+        nombreMedicamento: nombre,
+        descripcion,
+        precio: parseFloat(precio),
+        stock: parseInt(stock, 10),
+        proveedorID: parseInt(proveedor, 10),
+      });
+      alert("El medicamento ha sido guardado exitosamente.");
+      setNombre("");
+      setDescripcion("");
+      setPrecio("");
+      setStock("");
+      setProveedor("");
+    } catch (err) {
+      console.error("Error al guardar el medicamento:", err);
+      alert("Hubo un error al guardar el medicamento.");
+    }
   };
 
   const handleCancel = () => {
-    console.log("Operación cancelada");
     alert("Los cambios no han sido guardados.");
+    setNombre("");
+    setDescripcion("");
+    setPrecio("");
+    setStock("");
+    setProveedor("");
   };
 
   const handleAgregarProveedor = () => {
     if (nuevoProveedor) {
-      console.log("Nuevo proveedor agregado:", nuevoProveedor);
+      setProveedores([...proveedores, { id: proveedores.length + 1, nombre: nuevoProveedor }]);
       setModalAbierto(false);
       setNuevoProveedor("");
       alert(`El proveedor "${nuevoProveedor}" ha sido agregado exitosamente.`);
@@ -106,25 +98,8 @@ export const RegistroMedicamento = () => {
             required
           />
         </FormGroup>
-
-        {/* Proveedor */}
-        <FormGroup>
-          <Label>Proveedor</Label>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <Select
-              options={proveedores.map((p) => ({ value: p.id, label: p.nombre }))}
-              placeholder="Seleccione un proveedor"
-              onChange={(value) => setProveedor(value)}
-            />
-            <Button type="button" onClick={() => setModalAbierto(true)}>
-              Agregar Proveedor
-            </Button>
-          </div>
-        </FormGroup>
-
-        {/* Modal para agregar proveedor */}
         {modalAbierto && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={{ marginTop: "20px", border: "1px solid #ccc", padding: "10px", borderRadius: "8px" }}>
             <h3>Agregar Nuevo Proveedor</h3>
             <InputText
               placeholder="Ingrese el nombre del proveedor"
@@ -133,14 +108,10 @@ export const RegistroMedicamento = () => {
             />
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
               <Button onClick={handleAgregarProveedor}>Agregar</Button>
-              <Button onClick={() => setModalAbierto(false)}>
-                Cancelar
-              </Button>
+              <Button onClick={() => setModalAbierto(false)}>Cancelar</Button>
             </div>
           </div>
         )}
-
-        {/* Acciones */}
         <ActionGroup>
           <Button type="button" onClick={handleCancel}>
             Cancelar
@@ -150,4 +121,4 @@ export const RegistroMedicamento = () => {
       </form>
     </Container>
   );
-}
+};

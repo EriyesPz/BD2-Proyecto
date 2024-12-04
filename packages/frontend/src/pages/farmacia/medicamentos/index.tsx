@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { ActionsContainer, Container, Filters, Header } from "./styled";
-import { Button, InputText, Select, Table, Label } from "../../../components/ui";
+import {
+  Button,
+  InputText,
+  Select,
+  Table,
+  Label,
+} from "../../../components/ui";
 import { getMedicamentos } from "../../../lib/api";
 
 export const Medicamentos = () => {
@@ -33,7 +39,7 @@ export const Medicamentos = () => {
     new Set(medicamentos.map((med) => med.ProveedorID))
   ).map((proveedorID) => ({
     value: proveedorID.toString(),
-    label: `Proveedor #${proveedorID}`, // Cambiar a nombre real si está disponible
+    label: `Proveedor #${proveedorID}`,
   }));
 
   const medicamentosFiltrados = medicamentos.filter((med) => {
@@ -45,7 +51,8 @@ export const Medicamentos = () => {
       (filtroStock === "bajo" && med.Stock < 50) ||
       (filtroStock === "sin" && med.Stock === 0);
     const cumpleProveedor =
-      filtroProveedor === "todos" || med.ProveedorID.toString() === filtroProveedor;
+      filtroProveedor === "todos" ||
+      med.ProveedorID.toString() === filtroProveedor;
 
     return cumpleBusqueda && cumpleStock && cumpleProveedor;
   });

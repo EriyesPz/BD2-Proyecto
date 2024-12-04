@@ -1,6 +1,19 @@
 import React, { useState } from "react";
-import { ButtonGroup, Card, Container, FormGroup, Header, TextArea } from "./styled";
-import { Button, InputDate, InputText, Label, Select } from "../../../components/ui";
+import {
+  ButtonGroup,
+  Card,
+  Container,
+  FormGroup,
+  Header,
+  TextArea,
+} from "./styled";
+import {
+  Button,
+  InputDate,
+  InputText,
+  Label,
+  Select,
+} from "../../../components/ui";
 
 export const Pago = () => {
   const [monto, setMonto] = useState(100);
@@ -59,7 +72,10 @@ export const Pago = () => {
           </FormGroup>
           <FormGroup>
             <Label>Fecha de Pago</Label>
-            <InputDate value={fechaPago} onChange={(value) => setFechaPago(value)} />
+            <InputDate
+              value={fechaPago}
+              onChange={(value) => setFechaPago(value)}
+            />
           </FormGroup>
           <FormGroup>
             <Label>Observaciones</Label>
@@ -80,4 +96,4 @@ export const Pago = () => {
       </Card>
     </Container>
   );
-}
+};
