@@ -5,7 +5,7 @@ export { getEspecialidades, insertarEspecialidad } from "./especialidades";
 export { getExamenes, insertarExamen } from "./examenes";
 export { generarFacturaHospitalizacion, getFacturas, insertarFactura, insertarPago, obtenerTotalPagado } from "./factura";
 export { getHabitaciones, getTiposHabitacion, insertarHabitacion, insertarTipoHabitacion } from "./habitacion";
-export { darAltaHospitalizacion, getHospitalizaciones, obtenerCostoEstancia, registrarHospitalizacion } from "./hospitalizaciones";
+export { darAltaHospitalizacion, getHospitalizaciones, obtenerCostoEstancia, registrarHospitalizacion, getHospitalizacionPorID } from "./hospitalizaciones";
 export { getMedicamentos, getStockMedicamentos, insertarMedicamento, verificarStockMedicamento } from "./medicamentos";
 export { getHonorariosMedicos, getMedicos, getResumenMedicosConsultas, insertarMedico, getMedicoPorID } from "./medicos"
 export { calcularEdadPaciente, getPacientes, getResumenPacientesHospitalizaciones, insertarPaciente, getPacientePorID } from "./pacientes";

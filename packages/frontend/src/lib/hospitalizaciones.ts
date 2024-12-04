@@ -9,6 +9,15 @@ export const getHospitalizaciones = async () => {
   }
 };
 
+export const getHospitalizacionPorID = async (id: number) => {
+  try {
+    const response = await cliente.get(`/hospitalizacion/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error al obtener hospitalización: ${error.message}`);
+  }
+};
+
 export const registrarHospitalizacion = async (hospitalizacion: {
   pacienteID: number;
   habitacionID: number;

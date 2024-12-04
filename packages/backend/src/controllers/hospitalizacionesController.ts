@@ -4,6 +4,7 @@ import {
   registrarHospitalizacion,
   darAltaHospitalizacion,
   obtenerCostoEstancia,
+  obtenerHospitalizacionPorID,
 } from "../database/hospitalizaciones";
 
 export const ctlObtenerHospitalizaciones = async (
@@ -18,6 +19,39 @@ export const ctlObtenerHospitalizaciones = async (
     res.status(500).json(`Error: ${error}`);
   }
 };
+
+export const ctlObtenerHospitalizacionPorID = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { hospitalizacionID } = req.params;
+
+    if (!hospitalizacionID || isNaN(Number(hospitalizacionID))) {
+      res.status(400).json({
+        mensaje: "Debe proporcionar un ID de hospitalización válido.",
+      });
+      return;
+    }
+
+    const hospitalizacion = await obtenerHospitalizacionPorID(
+      parseInt(hospitalizacionID)
+    );
+
+    if (!hospitalizacion) {
+      res.status(404).json({
+        mensaje: "No se encontró una hospitalización con el ID proporcionado.",
+      });
+      return;
+    }
+
+    res.status(200).json(hospitalizacion);
+  } catch (error) {
+    console.error("Error al obtener detalles de la hospitalización:", error);
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
 
 export const ctlRegistrarHospitalizacion = async (
   req: Request,
@@ -64,12 +98,10 @@ export const ctlObtenerCostoEstancia = async (
     const { hospitalizacionID } = req.params;
 
     if (!hospitalizacionID) {
-      res
-        .status(400)
-        .json({
-          mensaje:
-            "Debe proporcionar 'hospitalizacionID' en los parámetros de la ruta.",
-        });
+      res.status(400).json({
+        mensaje:
+          "Debe proporcionar 'hospitalizacionID' en los parámetros de la ruta.",
+      });
       return;
     }
 

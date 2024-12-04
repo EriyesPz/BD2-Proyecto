@@ -35,7 +35,8 @@ export {
   ctlDarAltaHospitalizacion,
   ctlObtenerHospitalizaciones,
   ctlRegistrarHospitalizacion,
-  ctlObtenerCostoEstancia
+  ctlObtenerCostoEstancia,
+  ctlObtenerHospitalizacionPorID
 } from "./hospitalizacionesController";
 export {
   ctlInsertarMedicamento,

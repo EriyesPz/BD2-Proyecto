@@ -26,6 +26,42 @@ export const obtenerHospitalizaciones = async () => {
   }
 };
 
+export const obtenerHospitalizacionPorID = async (hospitalizacionID: number) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT 
+        h.HospitalizacionID,
+        CONCAT(p.Nombre, ' ', p.Apellido) AS NombrePaciente,
+        DATEDIFF(YEAR, p.FechaNacimiento, GETDATE()) AS EdadPaciente,
+        p.NumeroSeguroSocial,
+        p.Telefono AS Contacto,
+        r.NumeroHabitacion,
+        th.Tipo AS TipoHabitacion,
+        r.Caracteristicas,
+        h.FechaIngreso,
+        h.FechaAlta,
+        h.Diagnostico,
+        h.Estado
+      FROM Hospitalizacion.Hospitalizaciones AS h
+      INNER JOIN Paciente.Pacientes AS p
+        ON h.PacienteID = p.PacienteID
+      INNER JOIN Hospitalizacion.Habitaciones AS r
+        ON h.HabitacionID = r.HabitacionID
+      INNER JOIN Hospitalizacion.TiposHabitacion AS th
+        ON r.TipoHabitacionID = th.TipoHabitacionID
+      WHERE h.HospitalizacionID = @HospitalizacionID;
+    `;
+    const resultado = await pool
+      .request()
+      .input("HospitalizacionID", sql.Int, hospitalizacionID)
+      .query(consulta);
+    return resultado.recordset[0];
+  } catch (error) {
+    throw new Error(`Error al obtener detalles de hospitalización: ${error}`);
+  }
+};
+
 
 export const registrarHospitalizacion = async (
   pacienteID: number,

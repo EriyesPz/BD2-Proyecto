@@ -51,7 +51,8 @@ import {
   ctlObtenerTotalPagado,
   ctlVerificarStockMedicamento,
   ctlObtenerPacientePorID,
-  ctlObtenerMedicoPorID
+  ctlObtenerMedicoPorID,
+  ctlObtenerHospitalizacionPorID
 } from "./controllers";
 
 const router = Router();
@@ -104,6 +105,7 @@ router.post("/paciente-seguro", ctlInsertarPacienteSeguro);
 
 router.get("/hospitalizaciones", ctlObtenerHospitalizaciones);
 router.post("/hospitalizacion", ctlRegistrarHospitalizacion);
+router.get("/hospitalizacion/:hospitalizacionID", ctlObtenerHospitalizacionPorID);
 router.post("/hospitalizaciones/alta", ctlDarAltaHospitalizacion);
 
 router.get("/consultas-medicas", ctlObtenerConsultasMedicas);
