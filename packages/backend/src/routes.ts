@@ -54,12 +54,15 @@ import {
   ctlObtenerMedicoPorID,
   ctlObtenerHospitalizacionPorID,
   ctlObtenerFacturaPorID,
-  obtenerHonorarios
+  obtenerHonorarios,
+  ctlRegistrarConsultaMedica
 } from "./controllers";
 
 const router = Router();
 
 router.post("/login", ctlAuth);
+
+router.post("/registrar-consulta", ctlRegistrarConsultaMedica);
 
 router.get("/usuarios", ctlUsuarios);
 router.post("/usuario", ctlInsertarUsuario);

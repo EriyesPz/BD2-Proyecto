@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cliente } from "./cliente";
 
 export const getConsultasMedicas = async () => {
@@ -22,5 +23,21 @@ export const insertarConsultaMedica = async (consulta: {
     return response.data;
   } catch (error: any) {
     throw new Error(`Error al insertar consulta médica: ${error.message}`);
+  }
+};
+
+export const registrarConsultaMedica = async (consulta: {
+  pacienteID: number;
+  medicoID: number;
+  fechaConsulta: string;
+  motivoConsulta?: string;
+  diagnostico?: string;
+  prescripcion?: string;
+}) => {
+  try {
+    const response = await cliente.post("/registrar-consulta", consulta);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error al registrar consulta médica: ${error.message}`);
   }
 };

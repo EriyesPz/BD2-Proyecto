@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import styled from "styled-components";
 import { Button, InputDate, TextArea, Label, Select } from "../../../components/ui";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./styled";
+import { registrarConsultaMedica } from "../../../lib/api";
 
-// Datos simulados de pacientes y doctores
 const patients = [
   { id: "1", name: "John Doe" },
   { id: "2", name: "Jane Smith" },
@@ -14,56 +15,40 @@ const doctors = [
   { id: "3", name: "Dr. Who", available: true },
 ];
 
-const Card = styled.div`
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-family: "Roboto", sans-serif;
-`;
-
-const CardHeader = styled.div`
-  margin-bottom: 16px;
-  border-bottom: 1px solid #ddd;
-`;
-
-const CardTitle = styled.h2`
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-`;
-
-const CardContent = styled.div`
-  margin-bottom: 16px;
-`;
-
-const CardFooter = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
-`;
-
 export const ProgramacionConsulta = () => {
-  const [selectedPatient, setSelectedPatient] = useState("");
-  const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [consultationDateTime, setConsultationDateTime] = useState("");
-  const [consultationReason, setConsultationReason] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState<string>("");
+  const [selectedDoctor, setSelectedDoctor] = useState<string>("");
+  const [consultationDateTime, setConsultationDateTime] = useState<string>("");
+  const [consultationReason, setConsultationReason] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("Consulta programada:", {
-      selectedPatient,
-      selectedDoctor,
-      consultationDateTime,
-      consultationReason,
-    });
+
+    if (!selectedPatient || !selectedDoctor || !consultationDateTime) {
+      alert("Por favor, complete todos los campos obligatorios.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await registrarConsultaMedica({
+        pacienteID: parseInt(selectedPatient),
+        medicoID: parseInt(selectedDoctor),
+        fechaConsulta: consultationDateTime,
+        motivoConsulta: consultationReason,
+      });
+      alert(`Consulta registrada exitosamente. ID de la consulta: ${response.ConsultaID}`);
+      handleCancel();
+    } catch (error: any) {
+      console.error("Error al registrar la consulta:", error.message);
+      alert("Ocurrió un error al registrar la consulta.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    console.log("Programación cancelada");
     setSelectedPatient("");
     setSelectedDoctor("");
     setConsultationDateTime("");
@@ -84,12 +69,9 @@ export const ProgramacionConsulta = () => {
                 value: patient.id,
                 label: patient.name,
               }))}
-              onChange={setSelectedPatient}
+              onChange={(value) => setSelectedPatient(value)}
               placeholder="Seleccionar paciente"
             />
-            <Button type="button" style={{ marginTop: "8px" }}>
-              Registrar Nuevo Paciente
-            </Button>
           </div>
 
           <div>
@@ -101,7 +83,7 @@ export const ProgramacionConsulta = () => {
                   value: doctor.id,
                   label: doctor.name,
                 }))}
-              onChange={setSelectedDoctor}
+              onChange={(value) => setSelectedDoctor(value)}
               placeholder="Seleccionar médico"
             />
           </div>
@@ -124,12 +106,14 @@ export const ProgramacionConsulta = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="button" onClick={handleCancel}>
+          <Button type="button" onClick={handleCancel} disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit">Guardar</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Guardando..." : "Guardar"}
+          </Button>
         </CardFooter>
       </form>
     </Card>
   );
-}
+};

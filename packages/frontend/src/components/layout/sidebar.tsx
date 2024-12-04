@@ -93,7 +93,6 @@ export const Layout: React.FC = () => {
           <SectionTitle>Farmacia</SectionTitle>
           <SidebarItem to="/medicamentos">Lista de Medicamentos</SidebarItem>
           <SidebarItem to="/registrar-medicamento">Registrar Medicamento</SidebarItem>
-          <SidebarItem to="/proveedores">Gestión de Proveedores</SidebarItem>
         </Section>
 
         <Section>

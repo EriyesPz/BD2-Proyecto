@@ -43,3 +43,32 @@ export const insertarConsultaMedica = async (
     throw new Error(`Error al insertar consulta médica: ${error}`);
   }
 };
+
+
+export const registrarConsulta = async (consulta: {
+  pacienteID: number;
+  medicoID: number;
+  fechaConsulta: string;
+  motivoConsulta?: string;
+  diagnostico?: string;
+  prescripcion?: string;
+}) => {
+  const db = await dbConexion();
+
+  try {
+    const resultado = await db
+      .request()
+      .input("PacienteID", consulta.pacienteID)
+      .input("MedicoID", consulta.medicoID)
+      .input("FechaConsulta", consulta.fechaConsulta)
+      .input("MotivoConsulta", consulta.motivoConsulta || null)
+      .input("Diagnostico", consulta.diagnostico || null)
+      .input("Prescripcion", consulta.prescripcion || null)
+      .execute("Medico.sp_RegistrarConsulta");
+
+    return resultado.recordset[0]; 
+  } catch (error) {
+    const errorMessage = (error as any).message;
+    throw new Error(`Error al registrar consulta: ${errorMessage}`);
+  }
+};

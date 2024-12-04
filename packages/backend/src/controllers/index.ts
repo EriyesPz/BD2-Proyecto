@@ -1,6 +1,7 @@
 export {
   ctlInsertarConsultaMedica,
   ctlObtenerConsultasMedicas,
+  ctlRegistrarConsultaMedica
 } from "./consultasMedicasController";
 export {
   ctlGenerarFacturaHospitalizacion,

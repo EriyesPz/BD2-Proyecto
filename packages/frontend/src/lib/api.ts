@@ -1,4 +1,4 @@
-export { getConsultasMedicas, insertarConsultaMedica } from "./consultasMedicas";
+export { getConsultasMedicas, insertarConsultaMedica, registrarConsultaMedica } from "./consultasMedicas";
 export { getDirecciones, insertarDireccion } from "./direcciones";
 export { getEmpleados, insertarEmpleado } from "./empleados";
 export { getEspecialidades, insertarEspecialidad } from "./especialidades";
