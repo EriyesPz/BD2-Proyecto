@@ -27,6 +27,15 @@ export const insertarPaciente = async (paciente: {
   }
 };
 
+export const getPacientePorID = async (id: number) => {
+  try {
+    const response = await cliente.get(`/pacientes/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error al obtener el paciente con ID ${id}: ${error.message}`);
+  }
+};
+
 export const getResumenPacientesHospitalizaciones = async () => {
   try {
     const response = await cliente.get("/pacientes/resumen-hospitalizaciones");

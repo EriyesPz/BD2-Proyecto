@@ -5,12 +5,43 @@ export const obtenerPacientes = async () => {
   try {
     const pool = await dbConexion();
     const consulta = `
-      SELECT * FROM Paciente.Pacientes;
+      SELECT PacienteID, Nombre, Apellido, FechaNacimiento, Genero, Telefono, Email, DireccionID, NumeroSeguroSocial, FechaRegistro FROM Paciente.Pacientes;
     `;
     const resultado = await pool.request().query(consulta);
     return resultado.recordset;
   } catch (error) {
     throw new Error(`Error al obtener pacientes: ${error}`);
+  }
+};
+
+export const obtenerPacientePorID = async (pacienteID: number) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT 
+        PacienteID, 
+        Nombre, 
+        Apellido, 
+        FechaNacimiento, 
+        Genero, 
+        Telefono, 
+        Email, 
+        DireccionID, 
+        NumeroSeguroSocial, 
+        FechaRegistro
+      FROM Paciente.Pacientes
+      WHERE PacienteID = @PacienteID;
+    `;
+    const resultado = await pool
+      .request()
+      .input("PacienteID", sql.Int, pacienteID)
+      .query(consulta);
+    if (resultado.recordset.length === 0) {
+      throw new Error(`Paciente con ID ${pacienteID} no encontrado.`);
+    }
+    return resultado.recordset[0];
+  } catch (error) {
+    throw new Error(`Error al obtener paciente por ID: ${error}`);
   }
 };
 

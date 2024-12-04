@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
-import { Button, InputDate, InputText, Label, Select } from "../../../components/ui";
-import styled from "styled-components";
+import {
+  Button,
+  InputDate,
+  InputText,
+  Label,
+  Select,
+} from "../../../components/ui";
 import {
   insertarPaciente,
   insertarDireccion,
@@ -9,79 +14,38 @@ import {
   insertarPacienteSeguro,
 } from "../../../lib/api";
 import { SelectOption } from "../../../components/ui/select";
-
-const Card = styled.div`
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 16px;
-  font-family: "Roboto", sans-serif;
-`;
-
-const CardHeader = styled.div`
-  padding-bottom: 16px;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 16px;
-`;
-
-const CardTitle = styled.h2`
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-`;
-
-const Section = styled.div`
-  margin-bottom: 24px;
-`;
-
-const SectionTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 16px;
-`;
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const FullWidth = styled.div`
-  grid-column: span 2;
-`;
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  Section,
+  SectionTitle,
+  Grid,
+  FullWidth,
+} from "./styled";
 
 export const RegistroPaciente = () => {
-  // Estados para la información personal
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [fechaNacimiento, setFechaNacimiento] = useState("");
-  const [genero, setGenero] = useState("");
+  const [genero, setGenero] = useState<string | null>(null);
   const [numeroSeguroSocial, setNumeroSeguroSocial] = useState("");
   const [telefono, setTelefono] = useState("");
   const [email, setEmail] = useState("");
-
-  // Estados para la dirección
   const [calle, setCalle] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [estado, setEstado] = useState("");
   const [codigoPostal, setCodigoPostal] = useState("");
   const [pais, setPais] = useState("");
-
-  // Estados para el seguro médico
-  const [insuranceProviders, setInsuranceProviders] = useState<SelectOption[]>([]);
-  const [aseguradoraSeleccionada, setAseguradoraSeleccionada] = useState<string | null>(null);
+  const [insuranceProviders, setInsuranceProviders] = useState<SelectOption[]>(
+    []
+  );
+  const [aseguradoraSeleccionada, setAseguradoraSeleccionada] = useState<
+    string | null
+  >(null);
   const [numeroPoliza, setNumeroPoliza] = useState("");
   const [fechaVencimiento, setFechaVencimiento] = useState("");
 
-  // Obtener seguros médicos al cargar el componente
   useEffect(() => {
     const fetchInsuranceProviders = async () => {
       try {
@@ -100,7 +64,9 @@ export const RegistroPaciente = () => {
   }, []);
 
   const addNewInsuranceProvider = async () => {
-    const newProviderName = prompt("Ingrese el nombre de la nueva aseguradora:");
+    const newProviderName = prompt(
+      "Ingrese el nombre de la nueva aseguradora:"
+    );
     if (newProviderName) {
       try {
         const seguroMedicoData = {
@@ -112,14 +78,11 @@ export const RegistroPaciente = () => {
         const seguroResponse = await insertarSeguroMedico(seguroMedicoData);
         const nuevoSeguroID = seguroResponse.seguroID.toString();
 
-        // Actualizar las opciones del select
         const newOption: SelectOption = {
           value: nuevoSeguroID,
           label: newProviderName,
         };
         setInsuranceProviders((prev) => [...prev, newOption]);
-
-        // Seleccionar la nueva aseguradora
         setAseguradoraSeleccionada(nuevoSeguroID);
       } catch (error) {
         console.error("Error al insertar nueva aseguradora:", error);
@@ -130,34 +93,38 @@ export const RegistroPaciente = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      // Insertar dirección
-      const direccionData = {
-        calle,
-        ciudad,
-        estado,
-        codigoPostal,
-        pais,
-      };
+      if (!fechaNacimiento || isNaN(Date.parse(fechaNacimiento))) {
+        alert("Por favor, ingresa una fecha de nacimiento válida.");
+        return;
+      }
+      if (!genero) {
+        alert("Por favor, selecciona un género válido.");
+        return;
+      }
+
+      const formattedFechaNacimiento = new Date(fechaNacimiento)
+        .toISOString()
+        .split("T")[0];
+
+      const direccionData = { calle, ciudad, estado, codigoPostal, pais };
       const direccionResponse = await insertarDireccion(direccionData);
       const direccionID = direccionResponse.direccionID;
 
-      // Insertar paciente
       const pacienteData = {
         nombre,
         apellido,
-        fechaNacimiento,
-        genero,
+        fechaNacimiento: formattedFechaNacimiento,
+        genero: genero || "M",
         telefono,
         email,
-        direccionID,
+        direccionID: Number(direccionID),
         numeroSeguroSocial,
       };
+
       const pacienteResponse = await insertarPaciente(pacienteData);
       const pacienteID = pacienteResponse.pacienteID;
 
-      // Asociar paciente con seguro médico
       if (aseguradoraSeleccionada) {
         const pacienteSeguroData = {
           pacienteID,
@@ -169,6 +136,7 @@ export const RegistroPaciente = () => {
       }
 
       alert("Paciente registrado correctamente.");
+      handleCancel();
     } catch (error) {
       console.error("Error al registrar paciente:", error);
       alert("Ocurrió un error al registrar el paciente.");
@@ -179,7 +147,7 @@ export const RegistroPaciente = () => {
     setNombre("");
     setApellido("");
     setFechaNacimiento("");
-    setGenero("");
+    setGenero(null);
     setNumeroSeguroSocial("");
     setTelefono("");
     setEmail("");
@@ -199,7 +167,6 @@ export const RegistroPaciente = () => {
         <CardTitle>Registro/Edición de Paciente</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        {/* Información Personal */}
         <Section>
           <SectionTitle>Información Personal</SectionTitle>
           <Grid>
@@ -269,8 +236,6 @@ export const RegistroPaciente = () => {
             </FullWidth>
           </Grid>
         </Section>
-
-        {/* Dirección */}
         <Section>
           <SectionTitle>Dirección</SectionTitle>
           <Grid>
@@ -321,8 +286,6 @@ export const RegistroPaciente = () => {
             </div>
           </Grid>
         </Section>
-
-        {/* Seguro Médico */}
         <Section>
           <SectionTitle>Seguro Médico</SectionTitle>
           <Grid>
@@ -357,9 +320,9 @@ export const RegistroPaciente = () => {
             </div>
           </Grid>
         </Section>
-
-        {/* Footer */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        <div
+          style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}
+        >
           <Button type="button" onClick={handleCancel}>
             Cancelar
           </Button>

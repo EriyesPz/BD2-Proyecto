@@ -4,6 +4,7 @@ import {
   insertarPaciente,
   obtenerResumenPacientesHospitalizaciones,
   calcularEdadPaciente,
+  obtenerPacientePorID,
 } from "../database/pacientes";
 
 export const ctlObtenerPacientes = async (
@@ -15,6 +16,28 @@ export const ctlObtenerPacientes = async (
     res.status(200).json(pacientes);
   } catch (error) {
     console.error("Error al obtener pacientes:", error);
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
+export const ctlObtenerPacientePorID = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res
+        .status(400)
+        .json({ mensaje: "Debe proporcionar un 'id' válido en la URL." });
+      return;
+    }
+
+    const paciente = await obtenerPacientePorID(Number(id));
+    res.status(200).json(paciente);
+  } catch (error) {
+    console.error("Error al obtener paciente por ID:", error);
     res.status(500).json(`Error: ${error}`);
   }
 };
@@ -75,12 +98,10 @@ export const ctlCalcularEdadPaciente = async (
     const { fechaNacimiento } = req.query;
 
     if (!fechaNacimiento) {
-      res
-        .status(400)
-        .json({
-          mensaje:
-            "Debe proporcionar 'fechaNacimiento' en el parámetro de consulta.",
-        });
+      res.status(400).json({
+        mensaje:
+          "Debe proporcionar 'fechaNacimiento' en el parámetro de consulta.",
+      });
       return;
     }
 

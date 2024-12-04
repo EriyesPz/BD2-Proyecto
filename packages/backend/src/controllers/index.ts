@@ -48,7 +48,8 @@ export {
   ctlInsertarPaciente,
   ctlObtenerPacientes,
   ctlCalcularEdadPaciente,
-  ctlObtenerResumenPacientesHospitalizaciones
+  ctlObtenerResumenPacientesHospitalizaciones,
+  ctlObtenerPacientePorID
 } from "./pacientesController";
 export {
   ctlInsertarPacienteSeguro,
