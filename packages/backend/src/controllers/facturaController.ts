@@ -5,6 +5,7 @@ import {
   insertarPago,
   generarFacturaHospitalizacion,
   obtenerTotalPagado,
+  obtenerFacturaPorID,
 } from "../database/facturas";
 
 export const ctlObtenerFacturas = async (
@@ -19,6 +20,41 @@ export const ctlObtenerFacturas = async (
     res.status(500).json(`Error: ${error}`);
   }
 };
+
+export const ctlObtenerFacturaPorID = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { paciente } = req.params;
+
+    if (!paciente) {
+      res.status(400).json({
+        mensaje: "Debe proporcionar un nombre de paciente válido en los parámetros de la ruta.",
+      });
+      return;
+    }
+
+    const factura = await obtenerFacturaPorID(paciente);
+
+    if (!factura) {
+      res.status(404).json({
+        mensaje: "No se encontró una factura para el paciente proporcionado.",
+      });
+      return;
+    }
+
+    res.status(200).json(factura);
+  } catch (error) {
+    console.error("Error al obtener la factura por nombre de paciente:", error);
+    res.status(500).json({
+      mensaje: `Error al obtener la factura: ${
+        error instanceof Error ? error.message : error
+      }`,
+    });
+  }
+};
+
 
 export const ctlInsertarFactura = async (
   req: Request,
@@ -77,12 +113,9 @@ export const ctlObtenerTotalPagado = async (
     const { facturaID } = req.params;
 
     if (!facturaID) {
-      res
-        .status(400)
-        .json({
-          mensaje:
-            "Debe proporcionar 'facturaID' en los parámetros de la ruta.",
-        });
+      res.status(400).json({
+        mensaje: "Debe proporcionar 'facturaID' en los parámetros de la ruta.",
+      });
       return;
     }
 

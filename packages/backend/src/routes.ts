@@ -52,7 +52,8 @@ import {
   ctlVerificarStockMedicamento,
   ctlObtenerPacientePorID,
   ctlObtenerMedicoPorID,
-  ctlObtenerHospitalizacionPorID
+  ctlObtenerHospitalizacionPorID,
+  ctlObtenerFacturaPorID
 } from "./controllers";
 
 const router = Router();
@@ -116,6 +117,8 @@ router.post("/resultado-laboratorio", ctlInsertarResultadoLaboratorio);
 
 router.get("/facturas", ctlObtenerFacturas);
 router.post("/factura", ctlInsertarFactura);
+
+router.get("/factura/:paciente", ctlObtenerFacturaPorID);
 
 router.post("/pagos", ctlInsertarPago);
 

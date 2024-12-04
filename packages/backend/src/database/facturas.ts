@@ -14,6 +14,26 @@ export const obtenerFacturas = async () => {
   }
 };
 
+export const obtenerFacturaPorID = async (paciente: string) => {
+  try {
+    const pool = await dbConexion();
+    const consulta = `
+      SELECT * FROM Factura.vw_DetallesFacturaCompleta WHERE NombrePaciente = @paciente;
+    `;
+    const resultado = await pool
+      .request()
+      .input("paciente", sql.VarChar, paciente)
+      .query(consulta);
+
+    return resultado.recordset.length > 0 ? resultado.recordset[0] : null;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Error al obtener factura por nombre de paciente: ${error.message}`);
+    } else {
+      throw new Error(`Error al obtener factura por nombre de paciente: ${error}`);
+    }
+  }
+};
 
 
 export const insertarFactura = async (

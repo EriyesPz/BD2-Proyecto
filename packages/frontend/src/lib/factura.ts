@@ -10,6 +10,19 @@ export const getFacturas = async () => {
   }
 };
 
+export const getFacturaPorID = async (paciente: string) => {
+  try {
+    const response = await cliente.get(
+      `/factura/${encodeURIComponent(paciente)}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      `Error al obtener la factura por nombre de paciente: ${error.message}`
+    );
+  }
+};
+
 export const insertarFactura = async (factura: {
   pacienteID: number;
   fechaFactura: string;
@@ -39,7 +52,9 @@ export const insertarPago = async (pago: {
   }
 };
 
-export const generarFacturaHospitalizacion = async (hospitalizacionID: number) => {
+export const generarFacturaHospitalizacion = async (
+  hospitalizacionID: number
+) => {
   try {
     const response = await cliente.post("/facturas/generar-hospitalizacion", {
       hospitalizacionID,

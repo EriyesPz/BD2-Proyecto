@@ -3,7 +3,7 @@ export { getDirecciones, insertarDireccion } from "./direcciones";
 export { getEmpleados, insertarEmpleado } from "./empleados";
 export { getEspecialidades, insertarEspecialidad } from "./especialidades";
 export { getExamenes, insertarExamen } from "./examenes";
-export { generarFacturaHospitalizacion, getFacturas, insertarFactura, insertarPago, obtenerTotalPagado } from "./factura";
+export { generarFacturaHospitalizacion, getFacturas, insertarFactura, insertarPago, obtenerTotalPagado, getFacturaPorID } from "./factura";
 export { getHabitaciones, getTiposHabitacion, insertarHabitacion, insertarTipoHabitacion } from "./habitacion";
 export { darAltaHospitalizacion, getHospitalizaciones, obtenerCostoEstancia, registrarHospitalizacion, getHospitalizacionPorID } from "./hospitalizaciones";
 export { getMedicamentos, getStockMedicamentos, insertarMedicamento, verificarStockMedicamento } from "./medicamentos";

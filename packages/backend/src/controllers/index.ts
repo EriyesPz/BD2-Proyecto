@@ -7,7 +7,8 @@ export {
   ctlInsertarFactura,
   ctlInsertarPago,
   ctlObtenerFacturas,
-  ctlObtenerTotalPagado
+  ctlObtenerTotalPagado,
+  ctlObtenerFacturaPorID
 } from "./facturaController";
 export { ctlInsertarUsuario, ctlUsuarios } from "./controllerUsuarios";
 export {

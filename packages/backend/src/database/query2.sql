@@ -600,3 +600,26 @@ END;
 GO
 
 
+CREATE OR ALTER FUNCTION Factura.fn_ObtenerFacturasConInformacion ()
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        f.FacturaID,
+        f.FechaFactura,
+        f.TotalFactura,
+        f.EstadoPago,
+        f.Detalles,
+        p.PacienteID,
+        CONCAT(p.Nombre, ' ', p.Apellido) AS NombreCompleto,
+        p.FechaNacimiento,
+        p.Genero,
+        p.Telefono,
+        p.Email,
+        p.NumeroSeguroSocial
+    FROM Factura.Facturas AS f
+    INNER JOIN Paciente.Pacientes AS p
+        ON f.PacienteID = p.PacienteID
+);
+GO
