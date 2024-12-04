@@ -22,7 +22,7 @@ export interface SelectRef {
 }
 
 const Select = forwardRef<SelectRef, SelectProps>(
-  ({ options, onChange, placeholder = "Select an option" }, ref) => {
+  ({ options, onChange, placeholder = "Seleccionar opcion" }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState<SelectOption | null>(null);
 

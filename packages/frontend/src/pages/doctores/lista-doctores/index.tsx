@@ -75,7 +75,7 @@ export const DoctorsPage = () => {
         <Filter>
           <Label>Buscar por nombre</Label>
           <InputText
-            placeholder="Enter doctor name..."
+            placeholder="Doctor..."
             value={filterName}
             onChange={(e) => setFilterName(e.target.value)}
           />
@@ -84,7 +84,7 @@ export const DoctorsPage = () => {
           <Label>Especialidad</Label>
           <Select
             options={[
-              { value: "all", label: "All Specialties" },
+              { value: "all", label: "Especialidades" },
               ...specialties.map((specialty) => ({
                 value: specialty,
                 label: specialty,
@@ -97,9 +97,9 @@ export const DoctorsPage = () => {
           <Label>Tipo de doctor</Label>
           <Select
             options={[
-              { value: "all", label: "All Types" },
-              { value: "internal", label: "Internal" },
-              { value: "external", label: "External" },
+              { value: "all", label: "Tipos" },
+              { value: "internal", label: "Interno" },
+              { value: "external", label: "Externo" },
             ]}
             onChange={(value) => setFilterType(value)}
           />
