@@ -1,81 +1,69 @@
-import  { useState } from "react";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import { ActionsContainer, ButtonGroup, Container, FiltersContainer, Header } from "./styled";
 import { Button, InputDate, InputText, Label, Select, Table } from "../../../components/ui";
+import { getFacturas } from "../../../lib/api";
 
-const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: "Roboto", sans-serif;
-`;
-
-const Header = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-`;
-
-const FiltersContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-`;
-
-const ActionsContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-
-// Datos de ejemplo
-const facturas = [
-  {
-    id: "001",
-    paciente: "Juan Pérez",
-    fechaEmision: "2023-05-15",
-    total: 100.0,
-    estado: "Pendiente",
-  },
-  {
-    id: "002",
-    paciente: "María García",
-    fechaEmision: "2023-05-20",
-    total: 150.0,
-    estado: "Pagado",
-  },
-  {
-    id: "003",
-    paciente: "Carlos López",
-    fechaEmision: "2023-06-01",
-    total: 200.0,
-    estado: "Anulado",
-  },
-];
+interface Factura {
+  FacturaID: number;
+  FechaFactura: string;
+  TotalFactura: number;
+  EstadoPago: string;
+  Detalles: string | null;
+  PacienteID: number;
+  NombreCompleto: string;
+  FechaNacimiento: string;
+  Genero: string;
+  Telefono: string;
+  Email: string;
+  NumeroSeguroSocial: string;
+}
 
 export const ListaFacturas = () => {
+  const [facturas, setFacturas] = useState<Factura[]>([]);
   const [busqueda, setBusqueda] = useState("");
-  const [estadoPago, setEstadoPago] = useState("");
+  const [estadoPago, setEstadoPago] = useState("todas");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFacturas = async () => {
+      try {
+        setLoading(true);
+        const data: Factura[] = await getFacturas();
+        setFacturas(data);
+      } catch (err) {
+        console.error("Error al obtener facturas:", err);
+        setError("Error al cargar las facturas.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFacturas();
+  }, []);
 
   const filteredFacturas = facturas.filter((factura) => {
     const matchesBusqueda =
       !busqueda ||
-      factura.id.includes(busqueda) ||
-      factura.paciente.toLowerCase().includes(busqueda.toLowerCase());
+      factura.FacturaID.toString().includes(busqueda) ||
+      factura.NombreCompleto.toLowerCase().includes(busqueda.toLowerCase());
     const matchesEstado =
-      !estadoPago || estadoPago === "todas" || factura.estado === estadoPago;
+      estadoPago === "todas" || factura.EstadoPago === estadoPago;
     const matchesFecha =
-      (!fechaInicio || factura.fechaEmision >= fechaInicio) &&
-      (!fechaFin || factura.fechaEmision <= fechaFin);
+      (!fechaInicio || factura.FechaFactura >= fechaInicio) &&
+      (!fechaFin || factura.FechaFactura <= fechaFin);
     return matchesBusqueda && matchesEstado && matchesFecha;
   });
+
+  if (loading) {
+    return <Container>Cargando facturas...</Container>;
+  }
+
+  if (error) {
+    return <Container>{error}</Container>;
+  }
 
   return (
     <Container>
@@ -119,11 +107,11 @@ export const ListaFacturas = () => {
       </FiltersContainer>
       <Table
         columnas={[
-          { header: "Número de Factura", accessorKey: "id" },
-          { header: "Paciente", accessorKey: "paciente" },
-          { header: "Fecha de Emisión", accessorKey: "fechaEmision" },
-          { header: "Total", accessorKey: "total" },
-          { header: "Estado de Pago", accessorKey: "estado" },
+          { header: "Número de Factura", accessorKey: "FacturaID" },
+          { header: "Paciente", accessorKey: "NombreCompleto" },
+          { header: "Fecha de Emisión", accessorKey: "FechaFactura" },
+          { header: "Total", accessorKey: "TotalFactura" },
+          { header: "Estado de Pago", accessorKey: "EstadoPago" },
           { header: "Acciones", accessorKey: "acciones" },
         ]}
         datos={filteredFacturas.map((factura) => ({
@@ -131,17 +119,15 @@ export const ListaFacturas = () => {
           acciones: (
             <ButtonGroup>
               <Button>Ver</Button>
-              <Button>Pagar</Button>
+              <Button disabled={factura.EstadoPago !== "Pendiente"}>Pagar</Button>
               <Button>Anular</Button>
             </ButtonGroup>
           ),
         }))}
       />
       <ActionsContainer>
-        <Button>
-          + Nueva Factura
-        </Button>
+        <Button>+ Nueva Factura</Button>
       </ActionsContainer>
     </Container>
   );
-}
+};

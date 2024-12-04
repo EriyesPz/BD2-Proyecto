@@ -5,7 +5,7 @@ export const obtenerFacturas = async () => {
   try {
     const pool = await dbConexion();
     const consulta = `
-      SELECT * FROM Factura.Facturas;
+      SELECT * FROM Factura.fn_ObtenerFacturasConInformacion();
     `;
     const resultado = await pool.request().query(consulta);
     return resultado.recordset;
@@ -13,6 +13,8 @@ export const obtenerFacturas = async () => {
     throw new Error(`Error al obtener facturas: ${error}`);
   }
 };
+
+
 
 export const insertarFactura = async (
   pacienteID: number,
