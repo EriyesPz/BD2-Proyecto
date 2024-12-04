@@ -1,85 +1,107 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
+import {
+  FormActions,
+  FormContainer,
+  FormSection,
+  FormTitle,
+  RoomInfo,
+} from "./styled";
 import { Button, InputDate, InputText, Label, Select } from "../../../components/ui";
-
-const pacientes = [
-  { id: 1, nombre: "Juan Pérez" },
-  { id: 2, nombre: "María García" },
-  { id: 3, nombre: "Carlos López" },
-];
-
-const habitaciones = [
-  { id: 1, numero: "101", tipo: "Individual", precio: 100, disponible: true },
-  { id: 2, numero: "102", tipo: "Doble", precio: 150, disponible: true },
-  { id: 3, numero: "103", tipo: "Suite", precio: 200, disponible: false },
-];
-
-const FormContainer = styled.div`
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: "Roboto", sans-serif;
-`;
-
-const FormTitle = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const FormSection = styled.div`
-  margin-bottom: 16px;
-`;
-
-const RoomInfo = styled.div`
-  font-size: 14px;
-  color: #555;
-  margin-top: 8px;
-`;
-
-const FormActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-`;
+import { registrarHospitalizacion, getPacientes, getHabitaciones } from "../../../lib/api";
 
 export const FormularioHospitalizacion = () => {
-  const [pacienteSeleccionado, setPacienteSeleccionado] = useState("");
-  const [habitacionSeleccionada, setHabitacionSeleccionada] = useState("");
+  const [pacientes, setPacientes] = useState([]);
+  const [habitaciones, setHabitaciones] = useState([]);
+  const [pacienteSeleccionado, setPacienteSeleccionado] = useState<string | null>(null);
+  const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<string | null>(null);
   const [fechaIngreso, setFechaIngreso] = useState(() => {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     return now.toISOString().slice(0, 10);
   });
   const [diagnostico, setDiagnostico] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const pacientesData = await getPacientes();
+        const habitacionesData = await getHabitaciones();
+
+        setPacientes(
+          pacientesData.map((p: any) => ({
+            value: p.PacienteID.toString(),
+            label: `${p.Nombre} ${p.Apellido}`,
+          }))
+        );
+
+        setHabitaciones(
+          habitacionesData.map((h: any) => ({
+            value: h.HabitacionID.toString(),
+            label: `${h.NumeroHabitacion} - Tipo: ${h.TipoHabitacionID} ${
+              h.Disponible ? "" : "(No disponible)"
+            }`,
+            disponible: h.Disponible,
+          }))
+        );
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const habitacionInfo = habitaciones.find(
-    (h) => h.id.toString() === habitacionSeleccionada
-  );
+    (h: any) => h.value === habitacionSeleccionada
+  ) as { value: string; label: string; disponible: boolean } | undefined;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Formulario enviado", {
-      pacienteSeleccionado,
-      habitacionSeleccionada,
-      fechaIngreso,
-      diagnostico,
-    });
+
+    if (!pacienteSeleccionado || !habitacionSeleccionada || !diagnostico) {
+      setErrorMessage("Por favor, complete todos los campos obligatorios.");
+      return;
+    }
+
+    setLoading(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    try {
+      await registrarHospitalizacion({
+        pacienteID: Number(pacienteSeleccionado),
+        habitacionID: Number(habitacionSeleccionada),
+        fechaIngreso,
+        diagnostico,
+      });
+      setSuccessMessage("Hospitalización registrada correctamente.");
+      setPacienteSeleccionado(null);
+      setHabitacionSeleccionada(null);
+      setFechaIngreso(new Date().toISOString().slice(0, 10));
+      setDiagnostico("");
+    } catch (error) {
+      console.error("Error al registrar hospitalización:", error);
+      setErrorMessage("Hubo un error al registrar la hospitalización.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <FormContainer>
       <FormTitle>Registro de Hospitalización</FormTitle>
+      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
       <form onSubmit={handleSubmit}>
         <FormSection>
           <Label>Paciente</Label>
           <Select
-            options={pacientes.map((paciente) => ({
-              value: paciente.id.toString(),
-              label: paciente.nombre,
-            }))}
+            options={pacientes}
             placeholder="Seleccione un paciente"
             onChange={(value) => setPacienteSeleccionado(value)}
           />
@@ -90,19 +112,18 @@ export const FormularioHospitalizacion = () => {
         <FormSection>
           <Label>Habitación</Label>
           <Select
-            options={habitaciones.map((habitacion) => ({
-              value: habitacion.id.toString(),
-              label: `${habitacion.numero} - ${habitacion.tipo} ${
-                habitacion.disponible ? "" : "(No disponible)"
-              }`,
-              disabled: !habitacion.disponible,
+            options={habitaciones.map((h: any) => ({
+              value: h.value,
+              label: h.label,
+              disabled: !h.disponible,
             }))}
             placeholder="Seleccione una habitación"
             onChange={(value) => setHabitacionSeleccionada(value)}
           />
           {habitacionInfo && (
             <RoomInfo>
-              Precio por día: ${habitacionInfo.precio} - Tipo: {habitacionInfo.tipo}
+              Número: {habitacionInfo.label} - Disponible:{" "}
+              {habitacionInfo.disponible ? "Sí" : "No"}
             </RoomInfo>
           )}
         </FormSection>
@@ -122,12 +143,14 @@ export const FormularioHospitalizacion = () => {
           />
         </FormSection>
         <FormActions>
-          <Button type="button">
+          <Button type="button" disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit">Guardar</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Guardando..." : "Guardar"}
+          </Button>
         </FormActions>
       </form>
     </FormContainer>
   );
-}
+};
