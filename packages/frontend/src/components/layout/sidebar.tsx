@@ -1,4 +1,4 @@
-// components/Layout.tsx
+// src/components/Layout.tsx (o donde tengas tu Layout/Sidebar)
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import styled from "styled-components";
@@ -64,55 +64,50 @@ export const Layout: React.FC = () => {
         <Section>
           <SectionTitle>Pacientes</SectionTitle>
           <SidebarItem to="/pacientes">Lista de Pacientes</SidebarItem>
-          <SidebarItem to="/registrar-paciente">Registrar Paciente</SidebarItem>
-          <SidebarItem to="/paciente">Perfil de Paciente</SidebarItem>
         </Section>
 
         <Section>
-          <SectionTitle>Doctores</SectionTitle>
-          <SidebarItem to="/doctores">Lista de Doctores</SidebarItem>
-          <SidebarItem to="/registrar-doctor">Registrar Doctor</SidebarItem>
-          <SidebarItem to="/doctor">Perfil de Doctor</SidebarItem>
+          <SectionTitle>Médicos</SectionTitle>
+          <SidebarItem to="/medicos">Lista de Médicos</SidebarItem>
         </Section>
 
         <Section>
           <SectionTitle>Hospitalización</SectionTitle>
-          <SidebarItem to="/hospitalizacion">Lista de Hospitalizaciones</SidebarItem>
-          <SidebarItem to="/detalle-hospitalizacion">Detalle Hospitalización</SidebarItem>
-          <SidebarItem to="/registrar-hospitalizacion">Registrar Hospitalización</SidebarItem>
+          <SidebarItem to="/hospitalizaciones">Lista de Hospitalizaciones</SidebarItem>
+          <SidebarItem to="/hospitalizacion/crear">Crear Hospitalización</SidebarItem>
+          <SidebarItem to="/hospitalizacion/crear-factura">Crear Hospitalización con Factura</SidebarItem>
+          <SidebarItem to="/hospitalizacion/dar-alta">Dar Alta Hospitalización</SidebarItem>
         </Section>
 
         <Section>
           <SectionTitle>Facturación</SectionTitle>
           <SidebarItem to="/facturas">Lista de Facturas</SidebarItem>
-          <SidebarItem to="/factura">Detalle de Factura</SidebarItem>
-          <SidebarItem to="/pago">Registro de Pago</SidebarItem>
+          <SidebarItem to="/pagar-factura">Pagar Factura</SidebarItem>
         </Section>
 
         <Section>
-          <SectionTitle>Farmacia</SectionTitle>
-          <SidebarItem to="/medicamentos">Lista de Medicamentos</SidebarItem>
-          <SidebarItem to="/registrar-medicamento">Registrar Medicamento</SidebarItem>
+          <SectionTitle>Consultorios</SectionTitle>
+          <SidebarItem to="/consultorios">Lista de Consultorios</SidebarItem>
+          <SidebarItem to="/crear-consultorio">Crear Consultorio</SidebarItem>
         </Section>
 
         <Section>
-          <SectionTitle>Laboratorio</SectionTitle>
-          <SidebarItem to="/examenes">Lista de Exámenes</SidebarItem>
-          <SidebarItem to="/paciente-resultados">Resultados de Pacientes</SidebarItem>
-          <SidebarItem to="/registrar-resultado">Registrar Resultado</SidebarItem>
+          <SectionTitle>Atenciones Extras</SectionTitle>
+          <SidebarItem to="/medicamentos-aplicados">Registrar Medicamento Aplicado</SidebarItem>
+          <SidebarItem to="/alimento-suministrado">Registrar Alimento Suministrado</SidebarItem>
         </Section>
 
         <Section>
           <SectionTitle>Consultas</SectionTitle>
-          <SidebarItem to="/agendar-consulta">Agenda de Consultas</SidebarItem>
-          <SidebarItem to="/programar-consulta">Programar Consulta</SidebarItem>
-          <SidebarItem to="/registrar-consulta">Registrar Consulta</SidebarItem>
+          <SidebarItem to="/visita-medica">Registrar Visita Médica</SidebarItem>
+          <SidebarItem to="/examen-medico">Registrar Examen Médico</SidebarItem>
+          <SidebarItem to="/consultas">Consultas</SidebarItem>
         </Section>
 
         <Section>
           <SectionTitle>Reportes</SectionTitle>
+          <SidebarItem to="/habitaciones">Habitaciones Disponibles</SidebarItem>
           <SidebarItem to="/honorarios-medicos">Honorarios Médicos</SidebarItem>
-          <SidebarItem to="/inventario-medicamentos">Inventario de Medicamentos</SidebarItem>
         </Section>
       </Sidebar>
       <Content>

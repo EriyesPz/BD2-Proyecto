@@ -1,75 +1,38 @@
 export {
-  ctlInsertarConsultaMedica,
-  ctlObtenerConsultasMedicas,
-  ctlRegistrarConsultaMedica
-} from "./consultasMedicasController";
+  ctlGetPacientes,
+  ctlGetPaciente,
+  ctlCrearPaciente,
+} from "./controllerPaciente";
 export {
-  ctlGenerarFacturaHospitalizacion,
-  ctlInsertarFactura,
-  ctlInsertarPago,
-  ctlObtenerFacturas,
-  ctlObtenerTotalPagado,
-  ctlObtenerFacturaPorID
-} from "./facturaController";
-export { ctlInsertarUsuario, ctlUsuarios } from "./controllerUsuarios";
+  ctlGetMedicos,
+  ctlCrearMedico,
+  ctlGetMedico,
+  ctlObtenerHonorarios,
+  ctlGetEspecialidades,
+} from "./controllerMedico";
 export {
-  ctlInsertarDireccion,
-  ctlObtenerDirecciones,
-} from "./direccionesController";
-export {
-  ctlInsertarEmpleado,
-  ctlObtenerEmpleados,
-} from "./empleadosController";
-export {
-  ctlInsertarEspecialidad,
-  ctlObtenerEspecialidades,
-} from "./especialidadesController";
-export { ctlInsertarExamen, ctlObtenerExamenes } from "./examenesController";
-export {
-  ctlInsertarTipoHabitacion,
-  ctlObtenerTiposHabitacion,
-} from "./habitacionController";
-export {
-  ctlInsertarHabitacion,
+  ctlGetHospitalizaciones,
+  ctlGetHospitalizacion,
+  ctlCrearHospitalizacion,
   ctlObtenerHabitaciones,
-} from "./habitacionesController";
+  ctlHospitazacionesDetalles,
+  ctlGetTodasHabitaciones
+} from "./controllerHospitalizacion";
 export {
+  ctlGetConsultorios,
+  ctlGetConsultorio,
+  ctlCrearConsultorio,
+} from "./controllerConsultorio";
+export {
+  ctlCrearHospitalizacionConFactura,
   ctlDarAltaHospitalizacion,
-  ctlObtenerHospitalizaciones,
-  ctlRegistrarHospitalizacion,
-  ctlObtenerCostoEstancia,
-  ctlObtenerHospitalizacionPorID
-} from "./hospitalizacionesController";
+  ctlPagarFactura,
+  ctlGetFacturas,
+  ctlGetFactura
+} from "./controllerFacturacion";
 export {
-  ctlInsertarMedicamento,
-  ctlObtenerMedicamentos,
-  ctlObtenerStockMedicamentos,
-  ctlVerificarStockMedicamento
-} from "./medicamentosController";
-export { ctlInsertarMedico, ctlObtenerMedicos, ctlObtenerHonorariosMedicos,  ctlObtenerResumenMedicosConsultas, ctlObtenerMedicoPorID } from "./medicosController";
-export {
-  ctlInsertarPaciente,
-  ctlObtenerPacientes,
-  ctlCalcularEdadPaciente,
-  ctlObtenerResumenPacientesHospitalizaciones,
-  ctlObtenerPacientePorID
-} from "./pacientesController";
-export {
-  ctlInsertarPacienteSeguro,
-  ctlObtenerPacientesSeguros,
-} from "./pacientesSegurosController";
-export {
-  ctlInsertarProveedor,
-  ctlObtenerProveedores,
-} from "./proveedoresController";
-export { ctlInsertarPuesto, ctlObtenerPuestos } from "./puestosController";
-export {
-  ctlInsertarResultadoLaboratorio,
-  ctlObtenerResultadosLaboratorio,
-  ctlObtenerResultadosLaboratorioPorID
-} from "./resultadoLaboratorioController";
-export {
-  ctlInsertarSeguroMedico,
-  ctlObtenerSegurosMedicos,
-} from "./segurosController";
-export { obtenerHonorarios } from "./honorariosController";
+  ctlRegistrarMedicamentoAplicado,
+  ctlRegistrarAlimento,
+} from "./controllerInventario";
+export { ctlRegistrarVisita, ctlGetConsultas } from "./controllerConsultas";
+export { ctlGetMedicamentos } from "./controllerFarmacia";
